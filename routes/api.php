@@ -10,12 +10,15 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Models\User;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use Illuminate\Auth\Events\Verified;
-
+use App\Http\Controllers\Auth\OtpController;
 Route::group(["prefix" => "auth"], function () {
     // Route::get('/{provider}', [SocialAuthController::class, 'redirectToProvider']);
     // Route::get('/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback']);
     Route::post('/register',[AuthController::class,'register']);
     Route::post('/login',[AuthController::class,'login'])->name('login');
+    Route::post('/send-otp', [OtpController::class, 'sendOtp']);
+    Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
+    Route::post('/register-after-verification', [OtpController::class, 'registerAfterVerification']);
     // Route::post('/send', [TwilioController::class, 'sendOtp']);
     // Route::post('/verify', [TwilioController::class, 'verify']);
 });
