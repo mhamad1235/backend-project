@@ -1,0 +1,8 @@
+{
+    "OTP sent successfully": "OTP sent successfully",
+    "Invalid or expired OTP": "Invalid or expired OTP",
+    "Logged in successfully": "Logged in successfully",
+    "OTP verified. User not registered yet":"OTP verified. User not registered yet",
+    "User already registered":"User already registered",
+    "Technical Problem":"Technical Problem"
+}

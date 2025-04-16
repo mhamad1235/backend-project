@@ -13,36 +13,48 @@ use Illuminate\Support\Facades\Cache;
 class OtpController extends Controller
 {
     public function sendOtp(Request $request)
-{
-    try{
-        $request->validate([
-            'phone' => 'required|numeric'
-        ]);
+    {
+        try {
+            setAppLocale($request);
+            $request->validate([
+                'phone' => 'required|digits:10|regex:/^[1-9][0-9]{9}$/'
+            ]);
 
-        $code = rand(100000, 999999); // 6-digit OTP
-        Otp::create([
-            'phone' => $request->phone,
-            'code' => $code,
-            'expires_at' => Carbon::now()->addMinutes(5)
-        ]);
+            // Format phone number to +964
+            $rawPhone = $request->phone;
+            $formattedPhone = '+964' . $rawPhone;
 
-        // Send OTP via SMS gateway here
-        // For testing:
-        return response()->json(['message' => 'OTP sent', 'otp' => $code]);
-    }catch (\Throwable $th) {
-        return response()->json(['error' => $th->getMessage()], 500);
+            $code = rand(100000, 999999); // 6-digit OTP
+
+            Otp::create([
+                'phone' => $formattedPhone,
+                'code' => $code,
+                'expires_at' => Carbon::now()->addMinutes(5)
+            ]);
+
+            // Send OTP via SMS gateway here
+            // For testing:
+            $data = [
+                'otp' => $code
+            ];
+
+            return $this->jsonResponse(data: $data,message:__('OTP sent successfully'));
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
     }
-}
+
 
 public function verifyOtp(Request $request)
 {
     try {
         $request->validate([
-            'phone' => 'required|numeric',
+            'phone' => 'required|digits:10|regex:/^[1-9][0-9]{9}$/',
             'code' => 'required|string'
         ]);
-
-        $otp = Otp::where('phone', $request->phone)
+        $rawPhone = $request->phone;
+        $formattedPhone = '+964' . $rawPhone;
+        $otp = Otp::where('phone', $formattedPhone)
                   ->where('code', $request->code)
                   ->where('expires_at', '>=', now())
                   ->latest()
@@ -54,32 +66,34 @@ public function verifyOtp(Request $request)
 
         $otp->delete();
 
-        $user = User::where('phone', $request->phone)->first();
+        $user = User::where('phone', $formattedPhone)->first();
 
         if (!$user) {
             // Generate temporary verification token (UUID or random string)
             $token = Str::uuid()->toString();
 
             // Store in cache with expiry (e.g., 10 minutes)
-            Cache::put("verify_token_{$token}", $request->phone, now()->addMinutes(10));
+            Cache::put("verify_token_{$token}", $formattedPhone, now()->addMinutes(10));
 
-            return response()->json([
-                'message' => 'OTP verified. User not registered yet.',
+              $data=[
                 'verify' => true,
                 'is_exist' => false,
-                'verify_token' => $token,
-            ]);
+                'verify_token' => $token];
+
+            return $this->jsonResponse(data:$data,message:__('OTP verified. User not registered yet'));
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Logged in successfully',
+        $tokenModel = $user->tokens()->latest()->first();
+        $tokenModel->expires_at = now()->addMinutes(15);
+        $tokenModel->save();
+        $data=[
             'token' => $token,
             'verify' => true,
             'is_exist' => true,
             'user' => $user
-        ]);
+        ];
+        return $this->jsonResponse(data:$data,message:__('Logged in successfully'));
 
     } catch (\Throwable $th) {
         return response()->json(['error' => $th->getMessage()], 500);
@@ -89,48 +103,87 @@ public function verifyOtp(Request $request)
 public function registerAfterVerification(Request $request)
 {
     try {
-        //code...
-
     $request->validate([
         'name' => 'required|string|max:255',
         'birth_date' => 'required|date',
         'verify_token' => 'required|string',
     ]);
-
-    // Get phone from token
     $phone = Cache::get("verify_token_{$request->verify_token}");
 
     if (!$phone) {
-        return response()->json(['message' => 'Invalid or expired verification token'], 401);
+        return $this->jsonResponse(result:false,message: __('Invalid or expired verification token'), code: 401);
     }
 
-    // Optionally check again if user already exists
     if (User::where('phone', $phone)->exists()) {
-        return response()->json(['message' => 'User already registered'], 400);
+        return $this->jsonResponse(result:false,message: __('User already registered'), code: 400);
     }
 
-    // Create user
     $user = User::create([
         'phone' => $phone,
         'name' => $request->name,
         'birth_date' => $request->birth_date,
-        // add password or other fields if needed
     ]);
 
-    // Remove the token from cache
     Cache::forget("verify_token_{$request->verify_token}");
 
-    // Create token (auth)
     $token = $user->createToken('auth_token')->plainTextToken;
+    $tokenModel = $user->tokens()->latest()->first();
+    $tokenModel->expires_at = now()->addMinutes(15);
+    $tokenModel->save();
 
-    return response()->json([
-        'message' => 'User registered successfully',
+    $data=[
         'token' => $token,
         'user' => $user
-    ]);
+    ];
+    return $this->jsonResponse(data:$data,message:__('User registered successfully'));
 } catch (\Throwable $th) {
     return response()->json(['error' => $th->getMessage()], 500);
 }
+}
+
+public function refresh(Request $request)
+{
+    try{
+    $user = Auth::user();
+    $request->user()->tokens()->delete();
+    $tokens = $this->generateTokens($user);
+
+    return response()->json([
+        'token'=>$tokens
+    ]);
+
+}catch(\Throwable $th){
+    return $th->getMessage();
+}
+}
+
+public function generateTokens($user)
+{
+    $accessTokenExpireAt = now()->addMinutes(15);
+    $refreshTokenExpireAt = now()->addDays(60); // 60 days
+
+    // Create access token
+    $accessTokenInstance = $user->createToken('auth_token');
+    $accessToken = $accessTokenInstance->plainTextToken;
+
+    // Set custom expiration
+    $user->tokens()
+        ->where('id', $accessTokenInstance->accessToken->id)
+        ->update(['expires_at' => $accessTokenExpireAt]);
+
+    // Create refresh token
+    $refreshTokenInstance = $user->createToken('refresh_token');
+    $refreshToken = $refreshTokenInstance->plainTextToken;
+
+    // Set custom expiration
+    $user->tokens()
+        ->where('id', $refreshTokenInstance->accessToken->id)
+        ->update(['expires_at' => $refreshTokenExpireAt]);
+
+    return [
+        'accessToken' => $accessToken,
+        'refreshToken' => $refreshToken,
+    ];
 }
 
 }

@@ -1,0 +1,7 @@
+{
+    "OTP sent successfully": "تم إرسال رمز التحقق بنجاح",
+    "Invalid or expired OTP": "رمز التحقق غير صالح أو منتهي",
+    "Logged in successfully": "تم تسجيل الدخول بنجاح",
+    "OTP verified. User not registered yet":"تم التحقق من رمز التحقق. المستخدم غير مسجل بعد",
+    "Technical Problem":"مشكلة تقنية"
+}
