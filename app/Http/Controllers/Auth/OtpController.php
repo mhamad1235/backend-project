@@ -96,7 +96,7 @@ public function verifyOtp(Request $request)
         return $this->jsonResponse(data:$data,message:__('Logged in successfully'));
 
     } catch (\Throwable $th) {
-        return response()->json(['error' => $th->getMessage()], 500);
+        return $this->jsonResponse(message:__('Technical Problem'),code:500);
     }
 }
 
@@ -137,7 +137,7 @@ public function registerAfterVerification(Request $request)
     ];
     return $this->jsonResponse(data:$data,message:__('User registered successfully'));
 } catch (\Throwable $th) {
-    return response()->json(['error' => $th->getMessage()], 500);
+    return $this->jsonResponse(message:__('Technical Problem'),code:500);
 }
 }
 
@@ -148,12 +148,13 @@ public function refresh(Request $request)
     $request->user()->tokens()->delete();
     $tokens = $this->generateTokens($user);
 
-    return response()->json([
+    $data=[
         'token'=>$tokens
-    ]);
+    ];
 
+     return $this->jsonResponse(data:$data,message:"Succesful");
 }catch(\Throwable $th){
-    return $th->getMessage();
+    return $this->jsonResponse(message:__('Technical Problem'),code:500);
 }
 }
 
