@@ -1,0 +1,261 @@
+<!-- ========== App Menu ========== -->
+<div class="app-menu navbar-menu">
+  <!-- LOGO -->
+  <div class="navbar-brand-box">
+    <!-- Dark Logo-->
+    <a href="/" class="logo logo-dark">
+      <span class="logo-sm">
+        <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" height="70">
+      </span>
+      <span class="logo-lg">
+        <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" class="avatar-sm img-thumbnail rounded p-1" height="30">
+      </span>
+    </a>
+    <!-- Light Logo-->
+    <a href="/" class="logo logo-light">
+      <span class="logo-sm">
+        <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" height="60">
+      </span>
+      <span class="logo-lg">
+        <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" class="avatar-sm img-thumbnail rounded p-1" height="50">
+      </span>
+    </a>
+    <button type="button" class="btn btn-sm fs-20 header-item btn-vertical-sm-hover float-end p-0" id="vertical-hover">
+      <i class="ri-record-circle-line"></i>
+    </button>
+  </div>
+
+  <div id="scrollbar">
+    <div class="container-fluid">
+
+      <div id="two-column-menu">
+      </div>
+
+      <ul class="navbar-nav" id="navbar-nav">
+
+        {{-- @role('super-admin|admin') --}}
+        <li class="nav-item">
+          <a class="nav-link menu-link {{ request()->routeIs('root') ? 'active' : '' }}" href="{{ route('root') }}">
+            <i class="ri-apps-2-line"></i> <span>Dashboard</span>
+          </a>
+        </li>
+
+        {{-- cities --}}
+        @can('city_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('cities.*') ? 'active' : '' }}" href="{{ route('cities.index') }}">
+              <i class="ri-map-pin-line"></i> <span>Cities</span>
+            </a>
+          </li>
+        @endcan
+
+        {{-- banners --}}
+        @can('banner_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('banners.*') ? 'active' : '' }}" href="{{ route('banners.index') }}">
+              <i class="ri-image-line"></i> <span>Banners</span>
+            </a>
+          </li>
+        @endcan
+
+        {{-- orders --}}
+        @can('order_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('orders.*') ? 'collapsed active' : '' }}" href="#sidebarOrders" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarOrders">
+              <i class="ri-shopping-cart-2-line"></i> <span>Orders</span>
+            </a>
+            <div class="menu-dropdown {{ request()->routeIs('orders.*') ? 'show' : '' }} collapse" id="sidebarOrders">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+
+                  <a href="{{ route('orders.index') }}" class="nav-link {{ request()->routeIs('orders.index') && !request()->get('status') ? 'active' : '' }}">
+                    <span>All Orders</span>
+                    <span class="badge badge-pill bg-info status-badge d-none" id="totalOrders"></span>
+                  </a>
+
+                  <a href="{{ route('orders.index', ['status' => 'unpaid']) }}" class="nav-link {{ request()->get('status') == 'unpaid' ? 'active' : '' }}">
+                    <span>UnPaid Orders</span>
+                    <span class="badge badge-pill bg-info status-badge d-none" id="totalUnPaidOrders"></span>
+                  </a>
+
+                  <a href="{{ route('orders.index', ['status' => 'paid']) }}" class="nav-link {{ request()->get('status') == 'paid' ? 'active' : '' }}">
+                    <span>Paid Orders</span>
+                    <span class="badge badge-pill bg-info status-badge d-none" id="totalPaidOrders"></span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+        @endcan
+
+        {{-- tickets --}}
+        @can('ticket_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('tickets.*') ? 'active' : '' }}" href="{{ route('tickets.index') }}">
+              <i class="ri-ticket-line"></i> <span>Tickets</span>
+            </a>
+          </li>
+        @endcan
+
+        {{-- customer --}}
+        @can('customer_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('customers.*') ? 'active' : '' }}" href="{{ route('customers.index') }}">
+              <i class="ri-group-line"></i> <span>Customers</span>
+            </a>
+          </li>
+        @endcan
+
+        {{-- notifications --}}
+        {{-- @can('notification_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('notifications.*') ? 'collapsed active' : '' }}" href="#sidebarNotification" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarNotification">
+              <i class="ri-notification-2-line"></i> <span>Notifications</span>
+            </a>
+            <div class="menu-dropdown {{ request()->routeIs('notifications.*') ? 'show' : '' }} collapse" id="sidebarNotification">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a href="{{ route('notifications.index') }}" class="nav-link {{ request()->routeIs('notifications.index') && !request()->get('status') ? 'active' : '' }}">
+                    <span>Notification List</span>
+                    <span class="badge badge-pill bg-info status-badge d-none" id="totalNotifications"></span>
+                  </a>
+                </li>
+
+                <li class="nav-item">
+                  <a href="{{ route('notifications.index', ['status' => 'pending']) }}" class="nav-link {{ request()->get('status') == 'pending' ? 'active' : '' }}">
+                    <span>Pending Notifications</span>
+                    <span class="badge badge-pill bg-info status-badge d-none" id="totalPendingNotifications"></span>
+                  </a>
+                </li>
+
+                @can('notification_add')
+                  <li class="nav-item">
+                    <a href="{{ route('notifications.create') }}" class="nav-link {{ request()->routeIs('notifications.create') ? 'active' : '' }}">Add Notification</a>
+                  </li>
+                @endcan
+              </ul>
+            </div>
+          </li>
+        @endcan --}}
+
+        {{-- payment methods --}}
+        @can('payment_method_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('payment-methods.*') ? 'active' : '' }}" href="{{ route('payment-methods.index') }}">
+              <i class="ri-wallet-line"></i> <span>Payment Methods</span>
+            </a>
+          </li>
+        @endcan
+
+        {{-- users --}}
+        @can('user_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('users.*') ? 'collapsed active' : '' }}" href="#sidebarUsers" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarUsers">
+              <i class="ri-user-3-line"></i> <span>User Management</span>
+            </a>
+            <div class="menu-dropdown {{ request()->routeIs('users.*') ? 'show' : '' }} collapse" id="sidebarUsers">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">Users List</a>
+                </li>
+
+                @can('user_add')
+                  <li class="nav-item">
+                    <a href="{{ route('users.create') }}" class="nav-link {{ request()->routeIs('users.create') ? 'active' : '' }}">Add User</a>
+                  </li>
+                @endcan
+              </ul>
+            </div>
+          </li>
+        @endcan
+
+        {{-- roles --}}
+        @can('role_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('roles.*') ? 'collapsed active' : '' }}" href="#sidebarRoles" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarRoles">
+              <i class="ri-shield-user-line"></i> <span>Role Management</span>
+            </a>
+            <div class="menu-dropdown {{ request()->routeIs('roles.*') ? 'show' : '' }} collapse" id="sidebarRoles">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a href="{{ route('roles.index') }}" class="nav-link {{ request()->routeIs('roles.index') ? 'active' : '' }}">Roles List</a>
+                </li>
+
+                @can('role_add')
+                  <li class="nav-item">
+                    <a href="{{ route('roles.create') }}" class="nav-link {{ request()->routeIs('roles.create') ? 'active' : '' }}">Add Role</a>
+                  </li>
+                @endcan
+              </ul>
+            </div>
+          </li>
+        @endcan
+        {{-- @endrole --}}
+
+        {{-- faqs --}}
+        {{-- @can('faqs_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('faqs.*') ? 'active' : '' }}" href="{{ route('faqs.index') }}">
+              <i class="ri-question-line"></i> <span>FAQs</span>
+            </a>
+          </li>
+        @endcan --}}
+
+        {{-- public-info --}}
+        @can('public_info_view')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('public-infos.*') ? 'active' : '' }}" href="{{ route('public-infos.index') }}">
+              {{-- <i class="ri-question-line"></i> <span>FAQs</span> --}}
+              <i class="ri-information-line"></i> <span>Public Info</span>
+            </a>
+          </li>
+        @endcan
+
+        {{-- exchange rates --}}
+        @role('super-admin')
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="">
+              <i class="ri-settings-4-line"></i> <span>Settings</span>
+            </a>
+          </li>
+        @endrole
+
+      </ul>
+    </div>
+    <!-- Sidebar -->
+  </div>
+  <div class="sidebar-background"></div>
+</div>
+<!-- Left Sidebar End -->
+<!-- Vertical Overlay-->
+<div class="vertical-overlay"></div>
+
+@push('script')
+  <script>
+    $(document).ready(function() {
+      // remove d-none class from the badge
+      $('.status-badge').removeClass('d-none');
+      getSidebarStatusCount()
+    });
+
+    const getSidebarStatusCount = () => {
+      $.ajax({
+        url: "",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+          $("#totalOrders").html(data.totalOrders);
+          $("#totalUnPaidOrders").html(data.totalUnPaidOrders);
+          $("#totalPaidOrders").html(data.totalPaidOrders);
+
+          $("#totalThreads").html(data.totalThreads);
+          $("#totalPendingThreads").html(data.totalPendingThreads);
+          $("#totalPendingReplies").html(data.totalPendingReplies);
+
+          $("#totalNotifications").html(data.totalNotifications);
+          $("#totalPendingNotifications").html(data.totalPendingNotifications);
+        }
+      });
+    }
+  </script>
+@endpush

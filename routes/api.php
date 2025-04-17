@@ -5,12 +5,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Auth\TwilioController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\Api\LoginController;
+use App\Http\Controllers\Api\Auth\AuthController;
 use App\Models\User;
-use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Api\Auth\EmailVerificationController;
 use Illuminate\Auth\Events\Verified;
-use App\Http\Controllers\Auth\OtpController;
+use App\Http\Controllers\Api\Auth\OtpController;
 Route::group(["prefix" => "auth"], function () {
     // Route::get('/{provider}', [SocialAuthController::class, 'redirectToProvider']);
     // Route::get('/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback']);
