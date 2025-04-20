@@ -25,7 +25,8 @@ class OtpController extends Controller
             $rawPhone = $request->phone;
             $formattedPhone = '+964' . $rawPhone;
 
-            $code = rand(100000, 999999); // 6-digit OTP
+            $code = rand(100000, 999999); 
+            // 6-digit OTP
 
             Otp::create([
                 'phone' => $formattedPhone,
@@ -34,27 +35,27 @@ class OtpController extends Controller
             ]);
             
                // Send OTP via otpiq.com API
-         $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . config('services.otpiq.key'),
-                'Content-Type'  => 'application/json',
-            ])->post(config('services.otpiq.url'), [
-                'phoneNumber'       => '964' . $rawPhone, 
-                'smsType'           => 'verification',
-                'provider'          => 'whatsapp',
-                'verificationCode'  => (string) $code
-            ]);
+        //  $response = Http::withHeaders([
+        //         'Authorization' => 'Bearer ' . config('services.otpiq.key'),
+        //         'Content-Type'  => 'application/json',
+        //     ])->post(config('services.otpiq.url'), [
+        //         'phoneNumber'       => '964' . $rawPhone, 
+        //         'smsType'           => 'verification',
+        //         'provider'          => 'whatsapp',
+        //         'verificationCode'  => (string) $code
+        //     ]);
 
-        if (!$response->successful()) {
-            return response()->json([
-                'error' => 'Failed to send SMS',
-                'details' => $response->body()
-            ], $response->status());
-        }
-        // $data=[
-        //     'otp'=>$code
-        // ];
+        // if (!$response->successful()) {
+        //     return response()->json([
+        //         'error' => 'Failed to send SMS',
+        //         'details' => $response->body()
+        //     ], $response->status());
+        // }
+        $data=[
+            'otp'=>$code
+        ];
 
-            return $this->jsonResponse(message:__('OTP sent successfully'));
+            return $this->jsonResponse(data:$data,message:__('OTP sent successfully'));
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
