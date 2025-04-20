@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 class OtpController extends Controller
 {
     public function sendOtp(Request $request)
@@ -31,14 +32,26 @@ class OtpController extends Controller
                 'code' => $code,
                 'expires_at' => Carbon::now()->addMinutes(5)
             ]);
+            
+               // Send OTP via otpiq.com API
+         $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . config('services.otpiq.key'),
+                'Content-Type'  => 'application/json',
+            ])->post(config('services.otpiq.url'), [
+                'phoneNumber'       => '964' . $rawPhone, 
+                'smsType'           => 'verification',
+                'provider'          => 'whatsapp',
+                'verificationCode'  => (string) $code
+            ]);
 
-            // Send OTP via SMS gateway here
-            // For testing:
-            $data = [
-                'otp' => $code
-            ];
+        if (!$response->successful()) {
+            return response()->json([
+                'error' => 'Failed to send SMS',
+                'details' => $response->body()
+            ], $response->status());
+        }
 
-            return $this->jsonResponse(data: $data,message:__('OTP sent successfully'));
+            return $this->jsonResponse(message:__('OTP sent successfully'));
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

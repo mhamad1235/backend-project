@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    
+    'otpiq' => [
+    'key' => env('OTPIQ_API_KEY'),
+    'url' => env('OTPIQ_API_URL'),
+],
 
 ];

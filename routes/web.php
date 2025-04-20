@@ -4,7 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\HomeController;
-
+use App\Http\Controllers\Admin\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,5 +16,7 @@ Auth::routes();
 
 Route::middleware('auth:admin')->group(function () {
     Route::get('/dashboard', [HomeController::class, 'root'])->name(('root'));
+    Route::resource("users", UserController::class);
+
 });
 
