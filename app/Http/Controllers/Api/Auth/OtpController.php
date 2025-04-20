@@ -50,6 +50,9 @@ class OtpController extends Controller
                 'details' => $response->body()
             ], $response->status());
         }
+        // $data=[
+        //     'otp'=>$code
+        // ];
 
             return $this->jsonResponse(message:__('OTP sent successfully'));
         } catch (\Throwable $th) {
@@ -118,8 +121,9 @@ public function registerAfterVerification(Request $request)
     try {
     $request->validate([
         'name' => 'required|string|max:255',
-        'birth_date' => 'required|date',
+        'dob' => 'required|date',
         'verify_token' => 'required|string',
+        'fcm'=>'required|string'
     ]);
     $phone = Cache::get("verify_token_{$request->verify_token}");
 
@@ -134,7 +138,8 @@ public function registerAfterVerification(Request $request)
     $user = User::create([
         'phone' => $phone,
         'name' => $request->name,
-        'birth_date' => $request->birth_date,
+        'dob' => $request->dob,
+        'fcm'=>$request->fcm
     ]);
 
     Cache::forget("verify_token_{$request->verify_token}");
@@ -143,7 +148,7 @@ public function registerAfterVerification(Request $request)
     $tokenModel = $user->tokens()->latest()->first();
     $tokenModel->expires_at = now()->addMinutes(15);
     $tokenModel->save();
-
+    
     $data=[
         'token' => $token,
         'user' => $user

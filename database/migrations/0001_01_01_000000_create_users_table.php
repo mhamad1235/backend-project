@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->string('phone')->unique()->nullable();
+            $table->date('dob')->nullable();
+            $table->string('fcm')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
