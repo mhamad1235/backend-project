@@ -30,7 +30,11 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
     ->name('verification.verify');
 
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('refresh-token', [OtpController::class, 'refresh'])
         ->name('refresh');
+
+        Route::get('/test', function(){
+            return 'hello jalal';
+        });
     });

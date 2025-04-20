@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,5 +17,14 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+
+        $exceptions->renderable(function (AuthenticationException $e, $request) {
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'result' => false,
+                    'status' => Response::HTTP_UNAUTHORIZED,
+                    'message' => "Unauthenticated.",
+                ], 401);
+            }
+        });
     })->create();
