@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('phone')->unique()->nullable();
             $table->date('dob')->nullable();
+            $table->string('password');
+            $table->foreignId("city_id")->nullable()->constrained('cities')->nullOnDelete()->cascadeOnUpdate();
             $table->string('fcm')->nullable();
             $table->rememberToken();
             $table->timestamps();

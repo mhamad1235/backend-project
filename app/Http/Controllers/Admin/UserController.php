@@ -27,6 +27,9 @@ class UserController extends Controller
             return Datatables::of($data)
             ->addIndexColumn()
             ->editColumn("id", fn($row) => '<a href="#" class="fw-medium link-primary">#' . $row->id . '</a>')
+            ->addColumn('dob', function ($row) {
+                return $row->dob ? \Carbon\Carbon::parse($row->dob)->format('Y-m-d') : '-';
+            })
             ->addColumn('action', function ($row) {
                 $html = '<div class="dropdown d-inline-block">';
                 $html .= '<button class="btn btn-soft-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">';

@@ -1,4 +1,6 @@
 <!-- ========== App Menu ========== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <div class="app-menu navbar-menu">
   <!-- LOGO -->
   <div class="navbar-brand-box">
@@ -148,7 +150,6 @@
         @endcan
 
         {{-- users --}}
-        @can('user_view')
           <li class="nav-item">
             <a class="nav-link menu-link {{ request()->routeIs('users.*') ? 'collapsed active' : '' }}" href="#sidebarUsers" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarUsers">
               <i class="ri-user-3-line"></i> <span>User Management</span>
@@ -159,15 +160,14 @@
                   <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">Users List</a>
                 </li>
 
-                @can('user_add')
                   <li class="nav-item">
                     <a href="{{ route('users.create') }}" class="nav-link {{ request()->routeIs('users.create') ? 'active' : '' }}">Add User</a>
                   </li>
-                @endcan
+                
               </ul>
             </div>
           </li>
-        @endcan
+    
 
         {{-- roles --}}
         @can('role_view')

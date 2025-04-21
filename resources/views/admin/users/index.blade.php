@@ -80,6 +80,8 @@
                 <th>Name</th>
           
                 <th>Phone</th>
+                <th>date of birth</th>
+
              
                 <th>Create Date</th>
                 <th>action</th>
@@ -141,6 +143,9 @@
           },
           {
             data: 'phone'
+          },
+          {
+            data: 'dob'
           },
           {
             data: 'created_at',

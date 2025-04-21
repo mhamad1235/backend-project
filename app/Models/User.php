@@ -24,7 +24,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'dob',
         'fcm',
+        'password',
         'phone',
+        'city_id'
 
     ];
 
@@ -49,6 +51,13 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class)->withDefault([
+            "name" => "N/A",
+        ]);
     }
 
     public function ssos()

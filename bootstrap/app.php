@@ -6,6 +6,13 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Response;
 
+use App\Http\Middleware\AlwaysAcceptJson;
+use App\Http\Middleware\ApiLocalization;
+use App\Http\Middleware\EnsureSystemKey;
+use App\Http\Middleware\Localization;
+use App\Http\Middleware\SanitizeInput;
+use App\Http\Middleware\SetViewTitle;
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -14,7 +21,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->web([
+            Localization::class,
+            SetViewTitle::class,
+        ]);
+
+        $middleware->api([
+            AlwaysAcceptJson::class,
+            ApiLocalization::class,
+            EnsureSystemKey::class,
+            SanitizeInput::class
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
 

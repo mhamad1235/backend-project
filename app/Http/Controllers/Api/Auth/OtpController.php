@@ -10,7 +10,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Laravel\Sanctum\PersonalAccessToken;
+
 class OtpController extends Controller
 {
     public function sendOtp(Request $request)
@@ -100,12 +103,13 @@ public function verifyOtp(Request $request)
             return $this->jsonResponse(data:$data,message:__('OTP verified. User not registered yet'));
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-        $tokenModel = $user->tokens()->latest()->first();
-        $tokenModel->expires_at = now()->addMinutes(15);
-        $tokenModel->save();
+        $accessToken = $user->createToken('access_token', ['*'], now()->addMinutes(15))->plainTextToken;
+
+        $refreshToken = $user->createToken('refresh_token', ['*'], now()->addDays(30))->plainTextToken;
+    
         $data=[
-            'token' => $token,
+            'access_token' => $accessToken,
+            'refresh_token'=>$refreshToken,
             'verify' => true,
             'is_exist' => true,
             'user' => $user
@@ -124,7 +128,9 @@ public function registerAfterVerification(Request $request)
         'name' => 'required|string|max:255',
         'dob' => 'required|date',
         'verify_token' => 'required|string',
-        'fcm'=>'required|string'
+        'fcm'=>'required|string',
+        'password'=>'required|string|max:255',
+        'city_id' => 'required|exists:cities,id'
     ]);
     $phone = Cache::get("verify_token_{$request->verify_token}");
 
@@ -140,18 +146,21 @@ public function registerAfterVerification(Request $request)
         'phone' => $phone,
         'name' => $request->name,
         'dob' => $request->dob,
-        'fcm'=>$request->fcm
+        'fcm'=>$request->fcm,
+        'password'=>Hash::make($request->password),
+        'city_id'=>$request->city_id
     ]);
 
     Cache::forget("verify_token_{$request->verify_token}");
 
-    $token = $user->createToken('auth_token')->plainTextToken;
-    $tokenModel = $user->tokens()->latest()->first();
-    $tokenModel->expires_at = now()->addMinutes(15);
-    $tokenModel->save();
+    $accessToken = $user->createToken('access_token', ['*'], now()->addMinutes(15))->plainTextToken;
+
+    $refresh_token = $user->createToken('refresh_token', ['*'], now()->addDays(30))->plainTextToken;
+
     
     $data=[
-        'token' => $token,
+        'access_token' => $accessToken,
+        'refresh_token'=> $refresh_token,
         'user' => $user
     ];
     return $this->jsonResponse(data:$data,message:__('User registered successfully'));
@@ -160,21 +169,30 @@ public function registerAfterVerification(Request $request)
 }
 }
 
-public function refresh(Request $request)
+public function refreshToken(Request $request)
 {
-    try{
-    $user = Auth::user();
-    $request->user()->tokens()->delete();
-    $tokens = $this->generateTokens($user);
+    $refreshToken = $request->bearerToken();
+
+    $tokenModel = PersonalAccessToken::findToken($refreshToken);
+
+    if (!$tokenModel || $tokenModel->name !== 'refresh_token' || $tokenModel->expires_at < now()) {
+        return response()->json(['message' => 'Invalid or expired refresh token'], 401);
+    }
+
+    $user = $tokenModel->tokenable;
+
+    // ✅ Revoke all existing tokens (both access and refresh)
+    $user->tokens()->delete();
+
+    // ✅ Create new access and refresh tokens
+    $newAccessToken = $user->createToken('access_token', ['*'], now()->addMinutes(15))->plainTextToken;
+    $newRefreshToken = $user->createToken('refresh_token', ['*'], now()->addDays(30))->plainTextToken;
 
     $data=[
-        'token'=>$tokens
+        'access_token' => $newAccessToken,
+        'refresh_token' => $newRefreshToken
     ];
-
-     return $this->jsonResponse(data:$data,message:"Succesful");
-}catch(\Throwable $th){
-    return $this->jsonResponse(message:__('Technical Problem'),code:500);
-}
+    return $this->jsonResponse(data:$data,message:__('successfull'));
 }
 
 public function generateTokens($user)
