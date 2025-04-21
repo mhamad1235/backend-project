@@ -165,7 +165,7 @@ public function registerAfterVerification(Request $request)
     ];
     return $this->jsonResponse(data:$data,message:__('User registered successfully'));
 } catch (\Throwable $th) {
-    return $this->jsonResponse(message:__('Technical Problem'),code:500);
+    return $this->jsonResponse(message:__($th->getMessage()),code:500);
 }
 }
 
