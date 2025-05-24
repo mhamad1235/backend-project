@@ -23,13 +23,13 @@ class AuthController extends Controller
 
             $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
+                'phone'=>'requiresd',
                 'password' => 'required|string|min:8',
             ]);
 
             $user = User::create([
                 'name' => $request->name,
-                'email' => $request->email,
+                'phone' => $request->phone,
                 'password' => Hash::make($request->password),
             ]);
 
@@ -53,24 +53,24 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         $validated = $request->validated();
-    
+
         $user = User::where('phone', $validated["phone"])->first();
-    
+
         if (!$user || !Hash::check($validated['password'], $user->password)) {
             return $this->jsonResponse(false, "Wrong password or phone", Response::HTTP_UNAUTHORIZED);
         }
-    
+
         $accessToken = $user->createToken('access_token', ['*'], now()->addMinutes(15))->plainTextToken;
 
         $refreshToken = $user->createToken('refresh_token', ['*'], now()->addDays(30))->plainTextToken;
-        
+
         return $this->jsonResponse(true, "Login successful", Response::HTTP_OK, [
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
             'user' => new UserResource($user->load('city'))
         ]);
     }
-    
+
 
 }
 

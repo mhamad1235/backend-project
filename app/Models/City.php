@@ -9,18 +9,18 @@ use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Astrotomic\Translatable\Translatable;
 
-class City extends Model implements TranslatableContract
-{
-    use SoftDeletes, Translatable;
+    class City extends Model implements TranslatableContract
+    {
+        use SoftDeletes, Translatable;
 
-    protected $guarded = [];
-    public $translatedAttributes = ['name'];
-    protected $with = ["translations"];
-    protected $cascadeDeletes = ['translations'];
+        protected $guarded = [];
+        public $translatedAttributes = ['name'];
+        protected $with = ["translations"];
+        protected $cascadeDeletes = ['translations'];
 
-    protected $casts = [
-        'status' => ActiveStatus::class,
-        'is_delivery' => 'boolean',
-    ];
+        protected $casts = [
+            'status' => ActiveStatus::class,
+            'is_delivery' => 'boolean',
+        ];
 }
 

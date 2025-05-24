@@ -2,67 +2,49 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Defaults
-    |--------------------------------------------------------------------------
-    |
-    | This option defines the default authentication "guard" and password
-    | reset "broker" for your application. You may change these values
-    | as required, but they're a perfect start for most applications.
-    |
-    */
-
     'defaults' => [
-        // Sanctum is used for API by default (mobile users)
+        // Default remains the same for regular users
         'guard' => 'sanctum',
         'passwords' => 'users',
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Guards
-    |--------------------------------------------------------------------------
-    |
-    | Next, you may define every authentication guard for your application.
-    | Of course, a great default configuration has been defined for you
-    | which utilizes session storage plus the Eloquent user provider.
-    |
-    | All authentication guards have a user provider, which defines how the
-    | users are actually retrieved out of your database or other storage
-    | system used by the application. Typically, Eloquent is utilized.
-    |
-    | Supported: "session"
-    |
-    */
-
     'guards' => [
 
-        // Web guard (used for admin login via browser)
+        // Web-based admin guard (unchanged)
         'admin' => [
             'driver' => 'session',
             'provider' => 'admins',
         ],
 
-        // API token-based auth (mobile users)
+        // Regular user API guard (unchanged)
         'sanctum' => [
             'driver' => 'sanctum',
             'provider' => 'users',
+        ],
+
+        // ✅ New API guard for Account users (hotel, motel, etc.)
+        'account' => [
+            'driver' => 'sanctum',
+            'provider' => 'accounts',
         ],
     ],
 
     'providers' => [
 
-        // Used by mobile app users (API)
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
 
-        // Used by admin dashboard (web login)
         'admins' => [
             'driver' => 'eloquent',
             'model' => App\Models\Admin::class,
+        ],
+
+        // ✅ New provider for Account model
+        'accounts' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Account::class,
         ],
     ],
 
@@ -73,6 +55,7 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+        // You can add a password reset config for 'accounts' later if needed
     ],
 
     'password_timeout' => 10800,

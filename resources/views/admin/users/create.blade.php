@@ -31,6 +31,13 @@
                     <x-validation-feedback label="Name" />
                   </div>
                 </div>
+                   <div class="row mb-3">
+                  <label for="password" class="col-sm-3 col-form-label">Password</label>
+                  <div class="col-sm-9">
+                    <input type="password" class="form-control" id="password" name="password" value="{{ old('password') }}" required>
+                    <x-validation-feedback label="password" />
+                  </div>
+                </div>
 
 
                 <div class="row mb-3">
@@ -41,9 +48,30 @@
                   </div>
                 </div>
 
-              
+             <div class="row mb-3">
+             <label for="dob" class="col-sm-3 col-form-label">Date of Birth</label>
+             <div class="col-sm-9">
+             <input type="date" class="form-control" id="dob" name="dob" value="{{ old('dob') }}" required>
+             <x-validation-feedback label="dob" />
+             </div>
+             </div>
+ <div class="row mb-3">
+    <label for="city_id" class="col-sm-3 col-form-label">City</label>
+    <div class="col-sm-9">
+        <select class="form-select" id="city_id" name="city_id" required>
+            <option value="">Select City</option>
+            @foreach($cities as $city)
+                <option value="{{ $city->id }}" {{ old('city_id') == $city->id ? 'selected' : '' }}>
+                    {{ $city->name }}
+                </option>
+            @endforeach
+        </select>
+        <x-validation-feedback label="city_id" />
+    </div>
+</div>
 
-         
+
+
 
                 <div class="row justify-content-start">
                   <div class="col-sm-9">

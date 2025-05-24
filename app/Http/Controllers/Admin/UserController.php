@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Exports\GeneralExport;
 use App\Http\Requests\UserRequest;
+use App\Models\City;
 use App\Services\DataService;
 use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
@@ -56,12 +57,10 @@ class UserController extends Controller
 
     public function create()
     {
-        //check permission
 
 
-
-
-        return view('admin.users.create');
+        $cities=City::all();
+        return view('admin.users.create',compact('cities'));
     }
 
     public function store(Request $request)
@@ -71,7 +70,7 @@ class UserController extends Controller
         try {
             $validated = $request->all();
 
-      
+
 
             User::create($validated);
 
@@ -80,10 +79,7 @@ class UserController extends Controller
                 "icon" => "success",
             ]);
         } catch (\Throwable $th) {
-            return redirect()->back()->with([
-                "message" =>  $th->getMessage(),
-                "icon" => "error",
-            ]);
+            return $th->getMessage();
         }
     }
 
@@ -98,7 +94,7 @@ class UserController extends Controller
         //check permission
 
 
-     
+
 
         // $roles = Role::all()->pluck('id', 'name')->toArray();
         // if (!auth()->user()->hasRole('super-admin')) {
@@ -116,14 +112,14 @@ class UserController extends Controller
 
         try {
 
-           
+
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'phone' => 'required|string|max:20',
             ]);
-    
+
             $user->update($validated);
-          
+
 
             return redirect()->route('users.index')->with([
                 "message" =>  __('messages.update_message'),

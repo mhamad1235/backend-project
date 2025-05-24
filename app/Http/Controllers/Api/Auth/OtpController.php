@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\PersonalAccessToken;
-
+use App\Models\Place;
 class OtpController extends Controller
 {
     public function sendOtp(Request $request)
@@ -28,7 +28,7 @@ class OtpController extends Controller
             $rawPhone = $request->phone;
             $formattedPhone = '+964' . $rawPhone;
 
-            $code = rand(100000, 999999); 
+            $code = rand(100000, 999999);
             // 6-digit OTP
 
             Otp::create([
@@ -36,13 +36,13 @@ class OtpController extends Controller
                 'code' => $code,
                 'expires_at' => Carbon::now()->addMinutes(5)
             ]);
-            
+
                // Send OTP via otpiq.com API
         //  $response = Http::withHeaders([
         //         'Authorization' => 'Bearer ' . config('services.otpiq.key'),
         //         'Content-Type'  => 'application/json',
         //     ])->post(config('services.otpiq.url'), [
-        //         'phoneNumber'       => '964' . $rawPhone, 
+        //         'phoneNumber'       => '964' . $rawPhone,
         //         'smsType'           => 'verification',
         //         'provider'          => 'whatsapp',
         //         'verificationCode'  => (string) $code
@@ -106,7 +106,7 @@ public function verifyOtp(Request $request)
         $accessToken = $user->createToken('access_token', ['*'], now()->addMinutes(15))->plainTextToken;
 
         $refreshToken = $user->createToken('refresh_token', ['*'], now()->addDays(30))->plainTextToken;
-    
+
         $data=[
             'access_token' => $accessToken,
             'refresh_token'=>$refreshToken,
@@ -157,7 +157,7 @@ public function registerAfterVerification(Request $request)
 
     $refresh_token = $user->createToken('refresh_token', ['*'], now()->addDays(30))->plainTextToken;
 
-    
+
     $data=[
         'access_token' => $accessToken,
         'refresh_token'=> $refresh_token,
@@ -223,5 +223,24 @@ public function generateTokens($user)
         'refreshToken' => $refreshToken,
     ];
 }
+  public function index(Request $request)
+    {
+     setAppLocale($request);;
+ $lang = app()->getLocale();
+        $places = Place::with('translations')->get()->map(function ($place) use ($lang) {
+            return [
+                'id' => $place->id,
+                'name' => $place->translate($lang)->name ?? '',
+                'description' => $place->translate($lang)->description ?? '',
+                'image' => asset($place->image),
+                'latitude' => $place->latitude,
+                'longitude' => $place->longitude,
+            ];
+        });
 
+        return response()->json([
+            'lang' => $lang,
+            'data' => $places,
+        ]);
+    }
 }

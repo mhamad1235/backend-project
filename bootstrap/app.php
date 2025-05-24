@@ -12,7 +12,7 @@ use App\Http\Middleware\EnsureSystemKey;
 use App\Http\Middleware\Localization;
 use App\Http\Middleware\SanitizeInput;
 use App\Http\Middleware\SetViewTitle;
-
+use App\Http\Middleware\EnsureAccountRole;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+          $middleware->alias([
+            'role' =>EnsureAccountRole::class,
+        ]);
         $middleware->web([
             Localization::class,
             SetViewTitle::class,
@@ -30,7 +33,9 @@ return Application::configure(basePath: dirname(__DIR__))
             AlwaysAcceptJson::class,
             ApiLocalization::class,
             EnsureSystemKey::class,
-            SanitizeInput::class
+            SanitizeInput::class,
+        
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -38,8 +38,8 @@
 
 @include('layouts.customizer')
 
-<p  hidden></p>
-<p hidden></p>
+{{-- <p id="storeTempFile" hidden>{{ route('storeTempFile') }}</p>
+<p id="deleteTempFile" hidden>{{ route('deleteTempFile') }}</p> --}}
 
 <!-- JAVASCRIPT -->
 @include('layouts.vendor-scripts')

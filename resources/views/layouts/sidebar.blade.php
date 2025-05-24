@@ -163,11 +163,59 @@
                   <li class="nav-item">
                     <a href="{{ route('users.create') }}" class="nav-link {{ request()->routeIs('users.create') ? 'active' : '' }}">Add User</a>
                   </li>
-                
+
               </ul>
             </div>
           </li>
-    
+
+          <li class="nav-item">
+            <a class="nav-link menu-link {{ request()->routeIs('users.*') ? 'collapsed active' : '' }}" href="#sidebarUsers" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarUsers">
+              <i class="ri-user-3-line"></i> <span>Images</span>
+            </a>
+            <div class="menu-dropdown {{ request()->routeIs('users.*') ? 'show' : '' }} collapse" id="sidebarUsers">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a href="{{ route('images.index') }}" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">Images List</a>
+                </li>
+
+
+
+              </ul>
+            </div>
+          </li>
+
+            <li class="nav-item">
+    <a class="nav-link menu-link {{ request()->routeIs('cities.*') ? 'collapsed active' : '' }}" href="#sidebarAccounts" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('accounts.*') ? 'true' : 'false' }}" aria-controls="cityAccounts">
+        <i class="ri-building-line"></i> <span>City</span>
+    </a>
+    <div class="menu-dropdown collapse {{ request()->routeIs('accounts.*') ? 'show' : '' }}" id="cityAccounts">
+        <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+                <a href="{{ route('cities.index') }}" class="nav-link {{ request()->routeIs('accounts.index') ? 'active' : '' }}">City List</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('cities.create') }}" class="nav-link {{ request()->routeIs('accounts.create') ? 'active' : '' }}">Add City</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link menu-link {{ request()->routeIs('accounts.*') ? 'collapsed active' : '' }}" href="#sidebarAccounts" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('accounts.*') ? 'true' : 'false' }}" aria-controls="sidebarAccounts">
+        <i class="ri-building-line"></i> <span>Account Management</span>
+    </a>
+    <div class="menu-dropdown collapse {{ request()->routeIs('accounts.*') ? 'show' : '' }}" id="sidebarAccounts">
+        <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+                <a href="{{ route('accounts.index') }}" class="nav-link {{ request()->routeIs('accounts.index') ? 'active' : '' }}">Accounts List</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('accounts.create') }}" class="nav-link {{ request()->routeIs('accounts.create') ? 'active' : '' }}">Add Account</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
 
         {{-- roles --}}
         @can('role_view')
@@ -212,13 +260,6 @@
         @endcan
 
         {{-- exchange rates --}}
-        @role('super-admin')
-          <li class="nav-item">
-            <a class="nav-link menu-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="">
-              <i class="ri-settings-4-line"></i> <span>Settings</span>
-            </a>
-          </li>
-        @endrole
 
       </ul>
     </div>
