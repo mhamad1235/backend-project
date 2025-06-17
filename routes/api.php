@@ -17,22 +17,29 @@ use App\Http\Controllers\Api\Auth\AccountAuthController;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Hotel;
 use App\Http\Middleware\EnsureAccountRole;
+use App\Http\Controllers\Api\Auth\FIBPaymentController;
 
 
 Route::group(["prefix" => "auth"], function () {
     // Route::get('/{provider}', [SocialAuthController::class, 'redirectToProvider']);
     // Route::get('/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback']);
+    // Route::post('/send', [TwilioController::class, 'sendOtp']);
+    // Route::post('/verify', [TwilioController::class, 'verify']);
+
+
     Route::post('/register',[AuthController::class,'register']);
     Route::post('/login',[AuthController::class,'login'])->name('login');
     Route::post('/send-otp', [OtpController::class, 'sendOtp']);
     Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
     Route::post('/register-after-verification', [OtpController::class, 'registerAfterVerification']);
-    // Route::post('/send', [TwilioController::class, 'sendOtp']);
-    // Route::post('/verify', [TwilioController::class, 'verify']);
+    Route::post('/make-payment', [FIBPaymentController::class, 'createPayment']);
+    Route::post('/callback', [FIBPaymentController::class, 'handleCallback']);
+
+
 });
+
 Route::controller(DataResourceController::class)->group(function () {
     Route::get('cities',  'cities');
-
 });
 
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail'])

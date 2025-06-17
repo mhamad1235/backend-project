@@ -16,21 +16,19 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
-    {
-
-        if ($request->ajax()) {
-            $data = User::query()
+   public function index(Request $request)
+{
+    if ($request->ajax()) {
+        $data = User::select('id', 'name', 'phone', 'dob', 'created_at')
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('phone', 'like', '%' . $request->search . '%');
             });
-            return Datatables::of($data)
+
+        return Datatables::of($data)
             ->addIndexColumn()
             ->editColumn("id", fn($row) => '<a href="#" class="fw-medium link-primary">#' . $row->id . '</a>')
-            ->addColumn('dob', function ($row) {
-                return $row->dob ? \Carbon\Carbon::parse($row->dob)->format('Y-m-d') : '-';
-            })
+            ->addColumn('dob', fn($row) => $row->dob ? \Carbon\Carbon::parse($row->dob)->format('Y-m-d') : '-')
             ->addColumn('action', function ($row) {
                 $html = '<div class="dropdown d-inline-block">';
                 $html .= '<button class="btn btn-soft-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">';
@@ -46,11 +44,13 @@ class UserController extends Controller
                 return $html;
             })
             ->editColumn("created_at", fn($row) => $row->created_at->format('Y-m-d H:i'))
-            ->rawColumns(['id', 'action']) // Only include columns that use HTML
+            ->rawColumns(['id', 'action'])
             ->make(true);
     }
-                return view('admin.users.index');
-    }
+
+    return view('admin.users.index');
+}
+
 
 
 

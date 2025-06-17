@@ -29,7 +29,7 @@
             </div>
             <div class="col-sm-auto">
               <div class="d-flex flex-wrap gap-1">
-                <a href="" class="btn btn-primary create-btn">
+                <a href="images/upload" class="btn btn-primary create-btn">
                     <i class="ri-add-line me-1 align-bottom"></i> Add New Image
                 </a>
               </div>

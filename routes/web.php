@@ -23,7 +23,12 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/upload', [FileUploadController::class, 'index'])->name('images.index');
     Route::get('/upload/data', [FileUploadController::class, 'data'])->name('images.data');
     Route::post('/upload', [FileUploadController::class, 'upload'])->name('upload.submit');
+    Route::get('/images/upload', [FileUploadController::class, 'save'])->name('images.upload');
+    Route::post('/images/upload', [FileUploadController::class, 'save'])->name('images.upload');
+    Route::post('/images/insert', [FileUploadController::class, 'insert'])->name('images.insert');
     Route::resource('accounts', AccountController::class);
+   
+
 
 
 });

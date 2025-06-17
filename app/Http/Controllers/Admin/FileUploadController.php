@@ -58,7 +58,7 @@ public function data(Request $request)
 }
 
 
-    public function upload(Request $request)
+    public function insert(Request $request)
     {
         $request->validate([
             'file' => 'required|file|max:10240', // max 10MB
@@ -70,6 +70,14 @@ public function data(Request $request)
         ]);
         $url = Storage::disk('s3')->url($path);
 
-        return back()->with('success', 'File uploaded successfully!')->with('url', $url);
+         return redirect()->route('images.index')->with('success', 'Image uploaded successfully!');
     }
+    
+   public function save(Request $request)
+    {
+       return view('admin.images.create');
+
+    }
+
+
 }

@@ -103,18 +103,18 @@ public function verifyOtp(Request $request)
             return $this->jsonResponse(data:$data,message:__('OTP verified. User not registered yet'));
         }
 
-        $accessToken = $user->createToken('access_token', ['*'], now()->addMinutes(15))->plainTextToken;
+        //$accessToken = $user->createToken('access_token', ['*'], now()->addMinutes(15))->plainTextToken;
 
-        $refreshToken = $user->createToken('refresh_token', ['*'], now()->addDays(30))->plainTextToken;
+        //$refreshToken = $user->createToken('refresh_token', ['*'], now()->addDays(30))->plainTextToken;
 
-        $data=[
-            'access_token' => $accessToken,
-            'refresh_token'=>$refreshToken,
-            'verify' => true,
-            'is_exist' => true,
-            'user' => $user
-        ];
-        return $this->jsonResponse(data:$data,message:__('Logged in successfully'));
+        //$data=[
+         //   'access_token' => $accessToken,
+         //   'refresh_token'=>$refreshToken,
+         //   'verify' => true,
+         //   'is_exist' => true,
+        //    'user' => $user
+        //];
+       // return $this->jsonResponse(data:$data,message:__('Logged in successfully'));
 
     } catch (\Throwable $th) {
         return $this->jsonResponse(message:__('Technical Problem'),code:500);

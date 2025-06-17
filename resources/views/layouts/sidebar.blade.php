@@ -169,13 +169,16 @@
           </li>
 
           <li class="nav-item">
-            <a class="nav-link menu-link {{ request()->routeIs('users.*') ? 'collapsed active' : '' }}" href="#sidebarUsers" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarUsers">
+            <a class="nav-link menu-link {{ request()->routeIs('users.*') ? 'collapsed active' : '' }}" href="#sidebarImages" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarUsers">
               <i class="ri-user-3-line"></i> <span>Images</span>
             </a>
-            <div class="menu-dropdown {{ request()->routeIs('users.*') ? 'show' : '' }} collapse" id="sidebarUsers">
+            <div class="menu-dropdown {{ request()->routeIs('users.*') ? 'show' : '' }} collapse" id="sidebarImages">
               <ul class="nav nav-sm flex-column">
                 <li class="nav-item">
                   <a href="{{ route('images.index') }}" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">Images List</a>
+                </li>
+                  <li class="nav-item">
+                  <a href="{{ route('images.upload') }}" class="nav-link {{ request()->routeIs('images.upload') ? 'active' : '' }}">Add Images</a>
                 </li>
 
 
@@ -185,10 +188,10 @@
           </li>
 
             <li class="nav-item">
-    <a class="nav-link menu-link {{ request()->routeIs('cities.*') ? 'collapsed active' : '' }}" href="#sidebarAccounts" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('accounts.*') ? 'true' : 'false' }}" aria-controls="cityAccounts">
+    <a class="nav-link menu-link {{ request()->routeIs('cities.*') ? 'collapsed active' : '' }}" href="#sidebarCity" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('accounts.*') ? 'true' : 'false' }}" aria-controls="cityAccounts">
         <i class="ri-building-line"></i> <span>City</span>
     </a>
-    <div class="menu-dropdown collapse {{ request()->routeIs('accounts.*') ? 'show' : '' }}" id="cityAccounts">
+    <div class="menu-dropdown collapse {{ request()->routeIs('accounts.*') ? 'show' : '' }}" id="sidebarCity">
         <ul class="nav nav-sm flex-column">
             <li class="nav-item">
                 <a href="{{ route('cities.index') }}" class="nav-link {{ request()->routeIs('accounts.index') ? 'active' : '' }}">City List</a>
