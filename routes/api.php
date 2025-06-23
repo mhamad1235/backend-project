@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\Hotel;
 use App\Http\Middleware\EnsureAccountRole;
 use App\Http\Controllers\Api\Auth\FIBPaymentController;
+use App\Events\NewNotificationEvent;
 
 
 Route::group(["prefix" => "auth"], function () {
@@ -61,8 +62,7 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
     Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/places', [OtpController::class, 'index']);
 
-        Route::post('refresh-token', [OtpController::class, 'refreshToken'])
-        ->name('refresh');
+        Route::post('refresh-token', [OtpController::class, 'refreshToken'])->name('refresh');
 
         Route::get('/test', function(){
             $user = Auth::user();
@@ -84,3 +84,10 @@ Route::middleware(['auth:account', 'role:motel'])->group(function () {
         ]);
     });
 });
+
+Route::post('/test-image', [AccountAuthController::class, 'testImage'])->name('api.test.image');
+
+// Route::get('/test-event', function () {
+//  broadcast(new NewNotificationEvent('🚨 New message'));
+//     return 'Sent!';
+// });

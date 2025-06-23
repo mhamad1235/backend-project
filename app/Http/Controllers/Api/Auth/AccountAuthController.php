@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Account;
 use Illuminate\Support\Facades\Hash;
+use App\Helpers\GlobalHelper;
 class AccountAuthController extends Controller
 {
 public function login(Request $request)
 {
+    
     $request->validate([
         'phone' => 'required',
         'password' => 'required',
@@ -28,4 +30,6 @@ public function login(Request $request)
         'token' => $token,
     ]);
 }
+
+
 }

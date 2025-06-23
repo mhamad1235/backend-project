@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Response;
 use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
+use App\Helpers\GlobalHelper;
 class AuthController extends Controller
 {
     public function register(Request $request)
@@ -51,7 +52,7 @@ class AuthController extends Controller
         }
     }
     public function login(LoginRequest $request)
-    {
+    {    
         $validated = $request->validated();
 
         $user = User::where('phone', $validated["phone"])->first();

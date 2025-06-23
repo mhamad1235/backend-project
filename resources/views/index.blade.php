@@ -8,6 +8,7 @@
   <link href="{{ URL::asset('assets/libs/jsvectormap/css/jsvectormap.min.css') }}" rel="stylesheet" type="text/css" />
   <link href="{{ URL::asset('assets/libs/swiper/swiper-bundle.min.css') }}" rel="stylesheet" type="text/css" />
 @endsection
+@vite(['resources/js/app.js'])
 
 @section('content')
   <div class="row">
@@ -22,7 +23,46 @@
             </div>
             <div class="flex-grow-1 ms-3 overflow-hidden">
               <p class="text-uppercase fw-semibold text-muted text-truncate mb-3">Total Users</p>
-              <h4 class="fs-4 mb-0">1234</h4>
+           <span id="notification-counter">0</span>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof window.Echo === 'undefined') {
+            console.error('❌ Echo is not defined. Make sure build/js/app.js is loaded and Echo is configured in bootstrap.js');
+            return;
+        }
+
+        console.log("✅ Echo is ready:", window.Echo);
+
+       window.Echo.channel('action-channel')
+   window.Echo.channel('action-channel')
+    .listen('.ActionExecuted', function (e) {
+        console.log('🎯 Received event:', e.message);
+
+        // Play success sound
+        const audio = new Audio('/sounds/applepay.mp3');
+        audio.play().then(() => {
+            console.log('✅ Sound played');
+
+            // Wait 3 seconds before reload to allow sound to finish
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        }).catch(error => {
+            console.error('🔇 Failed to play sound:', error);
+            // Reload anyway after delay if sound fails
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        });
+    });
+
+
+
+    });
+</script>
+
+
             </div>
           </div>
         </div>
@@ -155,6 +195,3 @@
   </div>
 @endsection
 
-@section('script')
-  <script src="{{ URL::asset('build/js/app.js') }}"></script>
-@endsection

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\HomeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FileUploadController;
 use App\Http\Controllers\Admin\AccountController;
+use App\Events\NewNotificationEvent;
 Route::get('/', function () {
     return redirect('login');
 });
@@ -32,4 +33,16 @@ Route::middleware('auth:admin')->group(function () {
 
 
 });
+Route::get('/test-websocket', function() {
+    return view('websocket-test');
+});
 
+Route::get('/trigger', function () {
+    // Add logging to verify event dispatch
+    \Log::info('Dispatching ActionExecuted event');
+    
+    // Dispatch synchronously to ensure immediate broadcast
+    broadcast(new NewNotificationEvent("Data changed at: ".now()));
+    
+    return "Event fired! Check logs and Reverb server output.";
+});
