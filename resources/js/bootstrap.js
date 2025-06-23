@@ -9,11 +9,11 @@ window.Pusher = Pusher;
 window.Echo = new Echo({
     broadcaster: 'reverb',
     key: "my-app-key",
-    wsHost: '13.60.50.148',
+    wsHost: '51.20.56.40',
     wsPort: 6001,
     wssPort: 443,
     forceTLS: false,
-    enabledTransports: ['ws', 'wss'],
+    enabledTransports: ['ws'],
     authorizer: (channel) => {
         return {
             authorize: (socketId, callback) => {
