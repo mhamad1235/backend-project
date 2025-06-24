@@ -77,7 +77,7 @@ return [
                 'key' => env('REVERB_APP_KEY'),
                 'secret' => env('REVERB_APP_SECRET'),
                 'app_id' => env('REVERB_APP_ID', 'my-app-id'), // Fixed
-                'allowed_origins' => ['http://localhost:8000', 'http://127.0.0.1:8000', '*'],
+                'allowed_origins' => ['http://51.20.56.40'],
                 'options' => [
                     'host' => env('REVERB_HOST'),
                     'port' => env('REVERB_PORT', 443),
