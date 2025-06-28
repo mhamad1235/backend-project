@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\HomeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FileUploadController;
 use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\BusController;
+use App\Http\Controllers\Admin\BookingController;
 use App\Events\NewNotificationEvent;
 Route::get('/', function () {
     return redirect('login');
@@ -28,8 +30,11 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/images/upload', [FileUploadController::class, 'save'])->name('images.upload');
     Route::post('/images/insert', [FileUploadController::class, 'insert'])->name('images.insert');
     Route::resource('accounts', AccountController::class);
+    Route::resource('buses', BusController::class);
+    Route::resource('bookings', BookingController::class);
+    Route::patch('/bookings/{booking}/update-status', [BookingController::class, 'updateStatus'])
+        ->name('bookings.update-status');
    
-
 
 
 });

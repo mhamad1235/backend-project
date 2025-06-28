@@ -19,6 +19,7 @@ use App\Models\Hotel;
 use App\Http\Middleware\EnsureAccountRole;
 use App\Http\Controllers\Api\Auth\FIBPaymentController;
 use App\Events\NewNotificationEvent;
+use App\Http\Controllers\Api\BookingController;
 
 
 Route::group(["prefix" => "auth"], function () {
@@ -63,19 +64,11 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
         Route::get('/places', [OtpController::class, 'index']);
 
         Route::post('refresh-token', [OtpController::class, 'refreshToken'])->name('refresh');
-
-        Route::get('/test', function(){
-            $user = Auth::user();
-
-            if (!$user) {
-                return response()->json(['message' => 'Not authenticated'], 401);
-            }
-
-            return response()->json([
-                'user' => $user->name,
-                'city_name' => $user->city->name, // this uses the translated name if using Translatable
-            ]);
-        });
+         Route::get('/buses', [BookingController::class, 'getBuses']);
+         Route::post('/bookings/buses/{bus}', [BookingController::class, 'createBooking']);
+         Route::get('/bookings', [BookingController::class, 'getUserBookings']);
+         Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelBooking']);
+       
     });
 Route::middleware(['auth:account', 'role:motel'])->group(function () {
     Route::get('/motel/dashboard', function () {

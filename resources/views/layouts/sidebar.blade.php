@@ -219,6 +219,48 @@
     </div>
 </li>
 
+<li class="nav-item">
+    <a class="nav-link menu-link {{ request()->routeIs('buses.*') ? 'collapsed active' : '' }}" href="#sidebarBus" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('buses.*') ? 'true' : 'false' }}" aria-controls="sidebarAccounts">
+        <i class="ri-building-line"></i> <span>Bus</span>
+    </a>
+    <div class="menu-dropdown collapse {{ request()->routeIs('buses.*') ? 'show' : '' }}" id="sidebarBus">
+        <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+                <a href="{{ route('buses.index') }}" class="nav-link {{ request()->routeIs('buses.index') ? 'active' : '' }}">Bus List</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('buses.create') }}" class="nav-link {{ request()->routeIs('buses.create') ? 'active' : '' }}">Add Bus</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+
+<li class="nav-item">
+    <a class="nav-link menu-link {{ request()->routeIs('bookings.*') ? 'collapsed active' : '' }}"
+       href="#sidebarbookings" data-bs-toggle="collapse" role="button"
+       aria-expanded="{{ request()->routeIs('bookings.*') ? 'true' : 'false' }}"
+       aria-controls="sidebarBus">
+        <i class="ri-building-line"></i> <span>bookings</span>
+    </a>
+    <div class="menu-dropdown collapse {{ request()->routeIs('bookings.*') ? 'show' : '' }}" id="sidebarbookings">
+        <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+                <a href="{{ route('bookings.index') }}"
+                   class="nav-link {{ request()->routeIs('bookings.index') ? 'active' : '' }}">
+                   bookings List
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('bookings.create') }}"
+                   class="nav-link {{ request()->routeIs('bookings.create') ? 'active' : '' }}">
+                   bookings Bus
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+
 
         {{-- roles --}}
         @can('role_view')

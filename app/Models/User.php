@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\Meal;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 class User extends Authenticatable implements MustVerifyEmail
 {
 
@@ -65,4 +66,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Sso::class);
     }
 
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+    
+    public function busBookings(): HasMany
+    {
+        return $this->hasMany(Booking::class)
+            ->where('bookable_type', Bus::class);
+    }
+     
 }

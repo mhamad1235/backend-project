@@ -29,9 +29,9 @@ return [
     'servers' => [
 
         'reverb' => [
-            'host' => env('REVERB_HOST', '127.0.0.1'), // Changed
-            'port' => env('REVERB_PORT', 6001),
-            'scheme' => env('REVERB_SCHEME', 'http'),
+            'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
+                  'port' => env('REVERB_PORT', 6001),
+                   'scheme' => env('REVERB_SCHEME', 'http'),
             'path' => env('REVERB_SERVER_PATH', ''),
             'hostname' => env('REVERB_HOST'),
             'options' => [
@@ -76,8 +76,8 @@ return [
             [
                 'key' => env('REVERB_APP_KEY'),
                 'secret' => env('REVERB_APP_SECRET'),
-                'app_id' => env('REVERB_APP_ID', 'my-app-id'), // Fixed
-                'allowed_origins' => ['http://51.20.56.40'],
+               'app_id' => 'my-app-id',
+                'allowed_origins' => ['http://localhost:8000', 'http://127.0.0.1:8000', '*'],
                 'options' => [
                     'host' => env('REVERB_HOST'),
                     'port' => env('REVERB_PORT', 443),
