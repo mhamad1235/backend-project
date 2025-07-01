@@ -170,7 +170,7 @@
 
           <li class="nav-item">
             <a class="nav-link menu-link {{ request()->routeIs('users.*') ? 'collapsed active' : '' }}" href="#sidebarImages" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarUsers">
-              <i class="ri-user-3-line"></i> <span>Images</span>
+             <i class="ri-image-add-line"></i> <span>Images</span>
             </a>
             <div class="menu-dropdown {{ request()->routeIs('users.*') ? 'show' : '' }} collapse" id="sidebarImages">
               <ul class="nav nav-sm flex-column">
@@ -189,7 +189,7 @@
 
             <li class="nav-item">
     <a class="nav-link menu-link {{ request()->routeIs('cities.*') ? 'collapsed active' : '' }}" href="#sidebarCity" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('accounts.*') ? 'true' : 'false' }}" aria-controls="cityAccounts">
-        <i class="ri-building-line"></i> <span>City</span>
+        <i class="ri-bank-line"></i> <span>City</span>
     </a>
     <div class="menu-dropdown collapse {{ request()->routeIs('accounts.*') ? 'show' : '' }}" id="sidebarCity">
         <ul class="nav nav-sm flex-column">
@@ -221,7 +221,7 @@
 
 <li class="nav-item">
     <a class="nav-link menu-link {{ request()->routeIs('buses.*') ? 'collapsed active' : '' }}" href="#sidebarBus" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('buses.*') ? 'true' : 'false' }}" aria-controls="sidebarAccounts">
-        <i class="ri-building-line"></i> <span>Bus</span>
+        <i class="ri-bus-2-line"></i> <span>Bus</span>
     </a>
     <div class="menu-dropdown collapse {{ request()->routeIs('buses.*') ? 'show' : '' }}" id="sidebarBus">
         <ul class="nav nav-sm flex-column">
@@ -241,7 +241,7 @@
        href="#sidebarbookings" data-bs-toggle="collapse" role="button"
        aria-expanded="{{ request()->routeIs('bookings.*') ? 'true' : 'false' }}"
        aria-controls="sidebarBus">
-        <i class="ri-building-line"></i> <span>bookings</span>
+       <i class="ri-calendar-check-line"></i> <span>bookings</span>
     </a>
     <div class="menu-dropdown collapse {{ request()->routeIs('bookings.*') ? 'show' : '' }}" id="sidebarbookings">
         <ul class="nav nav-sm flex-column">
@@ -260,6 +260,32 @@
         </ul>
     </div>
 </li>
+
+<li class="nav-item">
+    <a class="nav-link menu-link {{ request()->routeIs('cabins.*') ? 'collapsed active' : '' }}"
+       href="#sidebarcabins" data-bs-toggle="collapse" role="button"
+       aria-expanded="{{ request()->routeIs('cabins.*') ? 'true' : 'false' }}"
+       aria-controls="sidebarcabins">
+       <i class="ri-hotel-bed-line"></i> <span>cabins</span>
+    </a>
+    <div class="menu-dropdown collapse {{ request()->routeIs('cabins.*') ? 'show' : '' }}" id="sidebarcabins">
+        <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+                <a href="{{ route('cabins.index') }}"
+                   class="nav-link {{ request()->routeIs('cabins.index') ? 'active' : '' }}">
+                   cabins List
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('cabins.create') }}"
+                   class="nav-link {{ request()->routeIs('cabins.create') ? 'active' : '' }}">
+                   cabins create
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+
 
 
         {{-- roles --}}

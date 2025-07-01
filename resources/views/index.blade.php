@@ -23,7 +23,7 @@
             </div>
             <div class="flex-grow-1 ms-3 overflow-hidden">
               <p class="text-uppercase fw-semibold text-muted text-truncate mb-3">Total Users</p>
-           <span id="notification-counter">0</span>
+           <span id="notification-counter">{{$data['total_users']}}</span>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -79,8 +79,8 @@
               </span>
             </div>
             <div class="flex-grow-1 ms-3">
-              <p class="text-uppercase fw-semibold text-muted text-truncate mb-3">Total Tickets</p>
-              <h4 class="fs-4 mb-0">5678</h4>
+              <p class="text-uppercase fw-semibold text-muted text-truncate mb-3">Total Bus</p>
+              <h4 class="fs-4 mb-0">{{$data['total_bus']}}</h4>
             </div>
           </div>
         </div>
@@ -97,8 +97,8 @@
               </span>
             </div>
             <div class="flex-grow-1 ms-3 overflow-hidden">
-              <p class="text-uppercase fw-semibold text-muted text-truncate mb-3">Total Order Amount</p>
-              <h4 class="fs-4 mb-0">100,000 IQD</h4>
+              <p class="text-uppercase fw-semibold text-muted text-truncate mb-3">Total Cabins</p>
+              <h4 class="fs-4 mb-0">{{$data['total_cabin']}}</h4>
             </div>
           </div>
         </div>

@@ -7,10 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Ticket;
+use App\Models\Bus;
+use App\Models\Cabin;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
+
 
 class HomeController extends Controller
 {
@@ -28,8 +31,13 @@ class HomeController extends Controller
 
     public function root()
     {
-       
-        return view('index');
+        $data= [
+            'total_users' => User::count(),
+            'total_bus' => Bus::count(),
+            'total_cabin' => Cabin::count(),
+           
+        ];
+        return view('index', compact('data'));
     }
 
     public function markNotification(Request $request)

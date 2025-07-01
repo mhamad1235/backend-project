@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\BusController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Events\NewNotificationEvent;
+use App\Http\Controllers\Admin\CabinController;
 Route::get('/', function () {
     return redirect('login');
 });
@@ -34,7 +35,9 @@ Route::middleware('auth:admin')->group(function () {
     Route::resource('bookings', BookingController::class);
     Route::patch('/bookings/{booking}/update-status', [BookingController::class, 'updateStatus'])
         ->name('bookings.update-status');
-   
+    Route::resource('cabins', CabinController::class);
+    Route::delete('/images/{image}/delete', [CabinController::class, 'deleteImage'])
+        ->name('images.delete');
 
 
 });
