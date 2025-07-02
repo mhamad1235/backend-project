@@ -17,8 +17,6 @@ class CityRequest extends FormRequest
             "en.name"     => ['required', "string", "min:3", "max:50"],
             "ar.name"     => ['required', "string", "min:3", "max:50"],
             "ku.name"     => ['required', "string", "min:3", "max:50"],
-            "cost"        => ["required", "numeric"],
-            "is_delivery" => ["sometimes", "boolean"],
         ];
     }
 
@@ -28,7 +26,7 @@ class CityRequest extends FormRequest
             "en.name.required" => "The English name field is required",
             "ar.name.required" => "The Arabic name field is required",
             "ku.name.required" => "The Kurdish name field is required",
-            "cost.required"    => "The cost field is required",
+           
         ];
     }
 

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('phone');
             $table->decimal('latitude', 10, 7);
             $table->decimal('longitude', 10, 7);
+            $table->foreignId('city_id')->constrained()->onDelete('cascade'); 
             $table->timestamps();
         });
     }

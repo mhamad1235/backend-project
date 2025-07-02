@@ -102,6 +102,18 @@
                             <label for="accuracy" class="form-label">Accuracy</label>
                             <input type="text" class="form-control" id="accuracy" readonly>
                         </div>
+                        <div class="mb-3">
+    <label for="city_id" class="form-label">Select City</label>
+ <select name="city_id" id="city_id" class="form-select" required>
+    <option value="">-- Choose City --</option>
+    @foreach ($cities as $city)
+        <option value="{{ $city['id'] }}" {{ old('city_id') == $city['id'] ? 'selected' : '' }}>
+            {{ $city['name'] }}
+        </option>
+    @endforeach
+</select>
+
+</div>
                         
                         <div class="col-12 mb-3">
                             <label for="images" class="form-label">Cabin Images</label>

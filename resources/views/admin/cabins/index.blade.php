@@ -58,6 +58,7 @@
                             <th>Location</th>
                             <th>Images</th>
                             <th>Created At</th>
+                            <th>City</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -118,11 +119,16 @@ $(document).ready(function () {
                 name: 'created_at' 
             },
             { 
+                data: 'city', 
+                name: 'city' 
+            },
+            { 
                 data: 'action', 
                 name: 'action', 
                 orderable: false, 
                 searchable: false 
-            }
+            },
+             
         ],
         language: {
             emptyTable: "No cabins found",

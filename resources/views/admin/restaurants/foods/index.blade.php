@@ -3,21 +3,36 @@
 @section('css')
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
+<style>
+    .img-thumbnail {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .img-thumbnail:hover {
+        transform: scale(1.5);
+        z-index: 10;
+        position: relative;
+    }
+</style>
 @endsection
 
 @section('content')
 @component('components.breadcrumb')
     @slot('li_1') Admin @endslot
-    @slot('li_2') {{ route('buses.index') }} @endslot
-    @slot('title') Buses @endslot
+    @slot('li_2') {{ $restaurant->name }} @endslot
+    @slot('title') Foods @endslot
 @endcomponent
 
 <div class="row">
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between">
-                <h5 class="card-title">Buses</h5>
-                <a href="{{ route('buses.create') }}" class="btn btn-primary">
+                <h5 class="card-title">Foods for {{ $restaurant->name }}</h5>
+                <a href="{{ route('restaurants.foods.create', $restaurant->id) }}" class="btn btn-primary">
                     <i class="ri-add-line me-1 align-bottom"></i> Add New
                 </a>
             </div>
@@ -26,7 +41,7 @@
                 <div class="row g-3 mb-3">
                     <div class="col-md-5">
                         <div class="search-box">
-                            <input type="text" class="form-control filter-input" placeholder="Search buses" id="search">
+                            <input type="text" class="form-control filter-input" placeholder="Search foods" id="search">
                             <i class="ri-search-line search-icon"></i>
                         </div>
                     </div>
@@ -39,14 +54,12 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Owner</th>
-                            <th>Phone</th>
-                            <th>Location</th>
-                            <th>Address</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Image</th>
                             <th>Created At</th>
-                            <th>City</th>
                             <th>Action</th>
-                         
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -69,66 +82,27 @@ $(document).ready(function () {
         processing: true,
         serverSide: true,
         ajax: {
-            url: "{{ route('buses.index') }}",
+            url: "{{ route('restaurants.foods.index', $restaurant->id) }}",
             data: function (d) {
                 d.search = $('#search').val();
             }
         },
-        columns: [
-            { 
-                data: 'DT_RowIndex', 
-                name: 'DT_RowIndex', 
-                orderable: false, 
-                searchable: false 
-            },
-            { 
-                data: 'owner_name', 
-                name: 'owner_name' 
-            },
-            { 
-                data: 'phone', 
-                name: 'phone' 
-            },
-            { 
-                data: 'location', 
-                name: 'location', 
-                orderable: false,
-                render: function(data, type, row) {
-                    // Make location clickable to open in Google Maps
-                    return `<a href="https://www.google.com/maps?q=${row.latitude},${row.longitude}" 
-                            target="_blank" class="text-primary">
-                            <i class="ri-map-pin-line align-middle me-1"></i>
-                            View Map
-                        </a>`;
-                }
-            },
-            { 
-                data: 'address', 
-                name: 'address' 
-            },
-            { 
-                data: 'created_at', 
-                name: 'created_at' 
-            },
-            {
-                data:'city',
-                name: 'city',
-            },
-            { 
+       columns: [
+    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+    { data: 'name', name: 'name' },
+    { data: 'price', name: 'price' },
+    { data: 'category', name: 'category' },
+    { data: 'images', name: 'images', orderable: false, searchable: false },
+    { data: 'created_at', name: 'created_at' },
+    { data: 'action', name: 'action', orderable: false, searchable: false }
+],
 
-                data: 'action', 
-                name: 'action', 
-                orderable: false, 
-                searchable: false 
-            },
-            
-        ],
         language: {
-            emptyTable: "No buses found",
-            zeroRecords: "No matching buses",
+            emptyTable: "No foods found",
+            zeroRecords: "No matching foods",
             processing: '<div class="spinner-border text-primary" role="status"></div> Loading...'
         },
-        order: [[5, 'desc']] // Default order by created_at descending
+        order: [[5, 'desc']]
     });
 
     let debounce;
@@ -142,6 +116,26 @@ $(document).ready(function () {
     $('#reset').on('click', function () {
         $('#search').val('');
         table.ajax.reload();
+    });
+
+    $(document).on('click', '.delete-btn', function () {
+        const url = $(this).data('url');
+        if (confirm('Are you sure you want to delete this food?')) {
+            $.ajax({
+                url: url,
+                method: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function () {
+                    table.ajax.reload();
+                    toastr.success('Food deleted successfully');
+                },
+                error: function () {
+                    toastr.error('Error deleting food');
+                }
+            });
+        }
     });
 });
 </script>

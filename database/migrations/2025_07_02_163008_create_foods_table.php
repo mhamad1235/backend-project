@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('buses', function (Blueprint $table) {
+        Schema::create('foods', function (Blueprint $table) {
             $table->id();
-            $table->string('phone');
-            $table->decimal('latitude', 10, 7);  // Enough for GPS coordinates
-            $table->decimal('longitude', 10, 7);
-            $table->text('address');
-            $table->string('owner_name');
-            $table->foreignId('city_id')->constrained()->onDelete('cascade'); 
+            $table->string('name');
+            $table->decimal('price', 8, 2);
+            $table->enum('category', ['popular', 'starters', 'mains', 'drinks', 'desserts']);
+            $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('buses');
+        Schema::dropIfExists('foods');
     }
 };

@@ -7,19 +7,19 @@
     <!-- Dark Logo-->
     <a href="/" class="logo logo-dark">
       <span class="logo-sm">
-        <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" height="70">
+        <img src="{{ URL::asset('assets/images/logo.jpg') }}" alt="" height="70">
       </span>
       <span class="logo-lg">
-        <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" class="avatar-sm img-thumbnail rounded p-1" height="30">
+        <img src="{{ URL::asset('assets/images/logo.jpg') }}" alt="" class="avatar-sm img-thumbnail rounded p-1" height="30">
       </span>
     </a>
     <!-- Light Logo-->
     <a href="/" class="logo logo-light">
       <span class="logo-sm">
-        <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" height="60">
+        <img src="{{ URL::asset('assets/images/logo.jpg') }}" alt="" height="60">
       </span>
       <span class="logo-lg">
-        <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" class="avatar-sm img-thumbnail rounded p-1" height="50">
+        <img src="{{ URL::asset('assets/images/logo.jpg') }}" alt="" class="avatar-sm img-thumbnail rounded p-1" height="50">
       </span>
     </a>
     <button type="button" class="btn btn-sm fs-20 header-item btn-vertical-sm-hover float-end p-0" id="vertical-hover">
@@ -286,6 +286,30 @@
     </div>
 </li>
 
+<li class="nav-item">
+    <a class="nav-link menu-link {{ request()->routeIs('restaurants.*') ? 'collapsed active' : '' }}"
+       href="#sidebarrestaurants" data-bs-toggle="collapse" role="button"
+       aria-expanded="{{ request()->routeIs('restaurants.*') ? 'true' : 'false' }}"
+       aria-controls="sidebarrestaurants">
+       <i class="ri-hotel-bed-line"></i> <span>Restaurants</span>
+    </a>
+    <div class="menu-dropdown collapse {{ request()->routeIs('restaurants.*') ? 'show' : '' }}" id="sidebarrestaurants">
+        <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+                <a href="{{ route('restaurants.index') }}"
+                   class="nav-link {{ request()->routeIs('restaurants.index') ? 'active' : '' }}">
+                   restaurants List
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('restaurants.create') }}"
+                   class="nav-link {{ request()->routeIs('restaurants.create') ? 'active' : '' }}">
+                   restaurants create
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
 
 
         {{-- roles --}}

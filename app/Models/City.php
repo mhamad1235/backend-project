@@ -22,5 +22,22 @@ use Astrotomic\Translatable\Translatable;
             'status' => ActiveStatus::class,
             'is_delivery' => 'boolean',
         ];
+
+        public function buses()
+        {   
+        return $this->hasMany(Bus::class);
+        }
+
+         public function cabins()
+        {   
+        return $this->hasMany(Cabin::class);
+        }
+
+        public function restaurants()
+        {
+        return $this->hasMany(Restaurant::class);
+        }
+
+
 }
 

@@ -6,18 +6,18 @@
         <div class="navbar-brand-box horizontal-logo">
           <a href="index" class="logo logo-dark">
             <span class="logo-sm">
-              <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" height="22">
+              <img src="{{ URL::asset('assets/images/logo.jpg') }}" alt="" height="22">
             </span>
             <span class="logo-lg">
-              <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" height="17">
+              <img src="{{ URL::asset('assets/images/logo.jpg') }}" alt="" height="17">
             </span>
           </a>
           <a href="index" class="logo logo-light">
             <span class="logo-sm">
-              <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" height="22">
+              <img src="{{ URL::asset('assets/images/logo.jpg') }}" alt="" height="22">
             </span>
             <span class="logo-lg">
-              <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" height="17">
+              <img src="{{ URL::asset('assets/images/logo.jpg') }}" alt="" height="17">
             </span>
           </a>
         </div>

@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\BusController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Events\NewNotificationEvent;
 use App\Http\Controllers\Admin\CabinController;
+use App\Http\Controllers\Admin\RestaurantController;
+use App\Http\Controllers\Admin\FoodController;
 Route::get('/', function () {
     return redirect('login');
 });
@@ -38,6 +40,20 @@ Route::middleware('auth:admin')->group(function () {
     Route::resource('cabins', CabinController::class);
     Route::delete('/images/{image}/delete', [CabinController::class, 'deleteImage'])
         ->name('images.delete');
+
+     
+Route::resource('restaurants', RestaurantController::class);
+
+Route::resource('restaurants.foods', FoodController::class);
+
+Route::prefix('restaurants/{restaurant}/foods')->group(function () {
+    Route::get('/', [FoodController::class, 'index'])->name('restaurants.foods.index');
+    Route::get('/create', [FoodController::class, 'create'])->name('restaurants.foods.create');
+    Route::post('/', [FoodController::class, 'store'])->name('restaurants.foods.store');
+    Route::get('/{food}/edit', [FoodController::class, 'foodsEdit'])->name('restaurants.foods.edit');
+    Route::put('/{food}', [FoodController::class, 'foodsUpdate'])->name('restaurants.foods.update');
+    Route::delete('/{food}', [FoodController::class, 'foodsDestroy'])->name('restaurants.foods.destroy');
+});
 
 
 });

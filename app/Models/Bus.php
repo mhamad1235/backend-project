@@ -12,6 +12,7 @@ class Bus extends Model
         'longitude',
         'address',
         'owner_name',
+        'city_id'
     ];
     
 
@@ -22,4 +23,9 @@ class Bus extends Model
         return $this->morphMany(Booking::class, 'bookable');
         
     }
+    public function city()
+    { 
+    return $this->belongsTo(City::class);
+    }
+
 }

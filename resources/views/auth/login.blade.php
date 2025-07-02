@@ -30,7 +30,7 @@
             <div class="mt-sm-5 text-white-50 mb-4 text-center">
               <div>
                 <a href="index" class="d-inline-block auth-logo">
-                  <img src="{{ URL::asset('assets/images/logo.png') }}" alt="" height="100">
+                  <img src="{{ URL::asset('assets/images/logo.jpg') }}" alt="" height="100">
                 </a>
               </div>
               {{-- <p class="fs-15 fw-medium mt-3"></p> --}}

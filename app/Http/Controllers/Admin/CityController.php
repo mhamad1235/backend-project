@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\City;
 use App\Http\Requests\CityRequest;
+
 class CityController extends Controller
 {
     /**
@@ -76,38 +77,34 @@ public function transformed(CityRequest $request): array
             'ar' => $data['ar']['name'],
             'ku' => $data['ku']['name'],
         ],
-        'cost' => $data['cost'],
-        'is_delivery' => $data['is_delivery'] ?? false,
+     
     ];
 }
 
-    public function store(CityRequest $request)
-    {
-        //check permission
+ public function store(CityRequest $request)
+{
+    try {
+        $city = new City();
+        $city->save(); // Save once to get an ID
 
+        foreach (['en', 'ar', 'ku'] as $locale) {
+            $city->translateOrNew($locale)->name = $request->validated()[$locale]['name'];
+        }
+
+        $city->save();
 
         return redirect()->route('cities.index')->with([
-            "message" => "You can't add new city",
-            "icon" => "warning",
+            "message" => "City has been created successfully",
+            "icon" => "success",
         ]);
-
-        try {
-            City::create($request->transformed());
-
-
-            return redirect()->route('cities.index')->with([
-                "message" =>  "Data has been saved successfully",
-                "icon" => "success",
-            ]);
-        } catch (\Throwable $th) {
-
-            throw $th;
-            return redirect()->back()->with([
-                "message" =>  $th->getMessage(),
-                "icon" => "error",
-            ]);
-        }
+    } catch (\Throwable $th) {
+        return redirect()->back()->withInput()->with([
+            "message" => $th->getMessage(),
+            "icon" => "error",
+        ]);
     }
+}
+
 
     public function edit(City $city)
     {

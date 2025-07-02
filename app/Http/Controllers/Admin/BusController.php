@@ -7,18 +7,20 @@ use App\Http\Controllers\Controller;
 use App\Models\Bus;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use App\Models\City;
 
 class BusController extends Controller
 {
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Bus::query()
-                ->when($request->search['value'] ?? null, function ($query, $search) {
-                    $query->where('owner_name', 'like', '%'.$search.'%')
-                          ->orWhere('phone', 'like', '%'.$search.'%')
-                          ->orWhere('address', 'like', '%'.$search.'%');
-                });
+              $data = Bus::query()->with('city') // Eager load
+            ->when($request->search['value'] ?? null, function ($query, $search) {
+                $query->where('owner_name', 'like', '%'.$search.'%')
+                    ->orWhere('phone', 'like', '%'.$search.'%')
+                    ->orWhere('address', 'like', '%'.$search.'%');
+            });
+
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -49,7 +51,13 @@ class BusController extends Controller
                     return '<span class="">'.$row->latitude.', '.$row->longitude.'</span>';
                 })
                 ->editColumn('created_at', fn($row) => $row->created_at->format('M d, Y h:i A'))
-                ->rawColumns(['action', 'location', 'created_at'])
+               ->editColumn('city', function($row) {
+                // Safely get translated name with fallback
+                return $row->city->name 
+                    ? $row->city->getTranslation('name', 'en', true)->name // Spatie example
+                    : '-';
+            })
+                ->rawColumns(['action', 'location', 'city', 'created_at'])
                 ->make(true);
         }
 
@@ -58,7 +66,12 @@ class BusController extends Controller
 
     public function create()
     {
-        return view('admin.buses.create');
+
+        $cities = City::with(['translations' => function ($query) {
+        $query->where('locale', 'en');
+        }])->get();
+
+        return view('admin.buses.create',compact('cities'));
     }
 
     public function store(Request $request)
@@ -69,8 +82,9 @@ class BusController extends Controller
             'longitude' => 'required|numeric',
             'address' => 'required|string|max:255',
             'owner_name' => 'required|string|max:255',
+            'city_id' => 'required|exists:cities,id',
         ]);
-
+       
         Bus::create($validated);
 
         return redirect()->route('buses.index')
