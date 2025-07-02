@@ -8,60 +8,11 @@ use Illuminate\Support\Facades\DB;
 use App\Enums\ActiveStatus;
 class CitySeeder extends Seeder
 {
-    public function run()
+  public function run()
     {
-        // Delete all the records from the table
+        // Clear existing data
         DB::table('cities')->delete();
         DB::table('city_translations')->delete();
-
-        $cities = [
-            [
-                "en" => ["name" => "Erbil"],
-                "ar" => ["name" => "أربيل"],
-                "ku" => ["name" => "هەولێر"],
-            ],
-            [
-                "en" => ["name" => "Duhok"],
-                "ar" => ["name" => "دهوك"],
-                "ku" => ["name" => "دهۆک"],
-            ],
-            [
-                "en" => ["name" => "Sulaymaniyah"],
-                "ar" => ["name" => "السليمانية"],
-                "ku" => ["name" => "سلێمانی"],
-            ],
-            [
-                "en" => ["name" => "Kirkuk"],
-                "ar" => ["name" => "كركوك"],
-                "ku" => ["name" => "کەرکووک"],
-            ],
-            [
-                "en" => ["name" => "Halabja"],
-                "ar" => ["name" => "حلبجة"],
-                "ku" => ["name" => "هەڵەبجە"],
-            ],
-        ];
-
-        // $cities = [
-        //     ["en" => "Al-Anbar", "ar" => "الأنبار", "ku" => "ئەنبار"],
-        //     ["en" => "Babil", "ar" => "بابل", "ku" => "بابل"],
-        //     ["en" => "Baghdad", "ar" => "بغداد", "ku" => "بەغداد"],
-        //     ["en" => "Basra", "ar" => "البصرة", "ku" => "بصرە"],
-        //     ["en" => "Dhi Qar", "ar" => "ذي قار", "ku" => "زیقار"],
-        //     ["en" => "Al-Qādisiyyah", "ar" => "القادسية", "ku" => "قادسیە"],
-        //     ["en" => "Diyala", "ar" => "ديالى", "ku" => "دیالە"],
-        //     ["en" => "Duhok", "ar" => "دهوك", "ku" => "دهۆک"],
-        //     ["en" => "Erbil", "ar" => "أربيل", "ku" => "هەولێر"],
-        //     ["en" => "Karbala", "ar" => "كربلاء", "ku" => "کەربەلاء"],
-        //     ["en" => "Kirkuk", "ar" => "كركوك", "ku" => "کەرکووک"],
-        //     ["en" => "Maysan", "ar" => "ميسان", "ku" => "میسان"],
-        //     ["en" => "Muthanna", "ar" => "المثنى", "ku" => "موسەنا"],
-        //     ["en" => "Najaf", "ar" => "النجف", "ku" => "نەجەف"],
-        //     ["en" => "Ninawa", "ar" => "نينوى", "ku" => "نەینەوا"],
-        //     ["en" => "Salah Al", "ar" => "صلاح الدين", "ku" => "سەلاحەدین"],
-        //     ["en" => "Sulaymaniyah", "ar" => "السليمانية", "ku" => "سلێمانی"],
-        //     ["en" => "Wasit", "ar" => "واسط", "ku" => "واست"],
-        // ];
 
         $cities = [
             [
@@ -160,17 +111,17 @@ class CitySeeder extends Seeder
                 "ku" => ["name" => "واست"],
             ],
         ];
+
         foreach ($cities as $cityData) {
-            $city = City::create(); // only if you have no required non-translatable columns
-    
+            $city = new City(['status' => ActiveStatus::ACTIVE]);
+
             foreach ($cityData as $locale => $translation) {
                 $city->translateOrNew($locale)->name = $translation['name'];
             }
-    
+
             $city->save();
         }
-        $city = City::create([
-            'status' => ActiveStatus::ACTIVE
-        ]);
+
+     
     }
 }
