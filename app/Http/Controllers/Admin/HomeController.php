@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Ticket;
 use App\Models\Bus;
-use App\Models\Cabin;
+use App\Models\Environment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\App;
@@ -34,7 +34,7 @@ class HomeController extends Controller
         $data= [
             'total_users' => User::count(),
             'total_bus' => Bus::count(),
-            'total_cabin' => Cabin::count(),
+            'total_cabin' =>20
            
         ];
         return view('index', compact('data'));

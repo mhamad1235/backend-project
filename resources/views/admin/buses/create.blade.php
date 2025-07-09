@@ -33,10 +33,52 @@
                     @csrf
                     
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="owner_name" class="form-label">Owner Name *</label>
-                            <input type="text" class="form-control" id="owner_name" name="owner_name" required>
+                            <ul class="nav nav-tabs mb-3" id="langTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="en-tab" data-bs-toggle="tab" data-bs-target="#en" type="button" role="tab">
+                                <i class="bi bi-translate me-1"></i> English
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ku-tab" data-bs-toggle="tab" data-bs-target="#ku" type="button" role="tab">
+                                <i class="bi bi-translate me-1"></i> Kurdish
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ar-tab" data-bs-toggle="tab" data-bs-target="#ar" type="button" role="tab">
+                                <i class="bi bi-translate me-1"></i> Arabic
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="langTabContent">
+                        <!-- English Tab -->
+                        <div class="tab-pane fade show active" id="en" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label">Owner Name (English) *</label>
+                                <input type="text" class="form-control" name="name[en]" required>
+                            </div>
+                            
                         </div>
+                        
+                        <!-- Kurdish Tab -->
+                        <div class="tab-pane fade" id="ku" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label">owner Name (Kurdish) *</label>
+                                <input type="text" class="form-control" name="name[ku]" required>
+                            </div>
+                        
+                        </div>
+                        
+                        <!-- Arabic Tab -->
+                        <div class="tab-pane fade" id="ar" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label">onwer Name (Arabic) *</label>
+                                <input type="text" class="form-control" name="name[ar]" required>
+                            </div>
+                          
+                        </div>
+                    </div>
                         
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label">Phone *</label>

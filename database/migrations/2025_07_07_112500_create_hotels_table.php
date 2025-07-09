@@ -12,11 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('hotels', function (Blueprint $table) {
-             $table->id();
-             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
-             $table->string('name');
-             $table->text('address')->nullable();
-             $table->timestamps();
+ 
+            $table->id(); // Primary key
+            $table->string('phone'); // Contact phone
+            $table->decimal('latitude', 10, 7); // Latitude coordinates
+            $table->decimal('longitude', 10, 7); // Longitude coordinates
+            $table->foreignId('city_id')->constrained()->onDelete('cascade'); // Foreign key to cities
+            $table->timestamps(); // created_at and updated_at
+      
         });
     }
 

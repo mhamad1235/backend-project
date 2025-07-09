@@ -262,24 +262,48 @@
 </li>
 
 <li class="nav-item">
-    <a class="nav-link menu-link {{ request()->routeIs('cabins.*') ? 'collapsed active' : '' }}"
-       href="#sidebarcabins" data-bs-toggle="collapse" role="button"
-       aria-expanded="{{ request()->routeIs('cabins.*') ? 'true' : 'false' }}"
-       aria-controls="sidebarcabins">
-       <i class="ri-hotel-bed-line"></i> <span>cabins</span>
+    <a class="nav-link menu-link {{ request()->routeIs('environments.*') ? 'collapsed active' : '' }}"
+       href="#sidebarenvironment" data-bs-toggle="collapse" role="button"
+       aria-expanded="{{ request()->routeIs('environments.*') ? 'true' : 'false' }}"
+       aria-controls="sidebarenvironment">
+       <i class="ri-hotel-bed-line"></i> <span>environment</span>
     </a>
-    <div class="menu-dropdown collapse {{ request()->routeIs('cabins.*') ? 'show' : '' }}" id="sidebarcabins">
+    <div class="menu-dropdown collapse {{ request()->routeIs('environments.*') ? 'show' : '' }}" id="sidebarenvironment">
         <ul class="nav nav-sm flex-column">
             <li class="nav-item">
-                <a href="{{ route('cabins.index') }}"
-                   class="nav-link {{ request()->routeIs('cabins.index') ? 'active' : '' }}">
-                   cabins List
+                <a href="{{ route('environments.index') }}"
+                   class="nav-link {{ request()->routeIs('environments.index') ? 'active' : '' }}">
+                   environment List
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('cabins.create') }}"
-                   class="nav-link {{ request()->routeIs('cabins.create') ? 'active' : '' }}">
-                   cabins create
+                <a href="{{ route('environments.create') }}"
+                   class="nav-link {{ request()->routeIs('environments.create') ? 'active' : '' }}">
+                   environment create
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+<li class="nav-item">
+    <a class="nav-link menu-link {{ request()->routeIs('hotels.*') ? 'collapsed active' : '' }}"
+       href="#sidebarhotels" data-bs-toggle="collapse" role="button"
+       aria-expanded="{{ request()->routeIs('hotels.*') ? 'true' : 'false' }}"
+       aria-controls="sidebarhotels">
+       <i class="ri-hotel-bed-line"></i> <span>hotels</span>
+    </a>
+    <div class="menu-dropdown collapse {{ request()->routeIs('hotels.*') ? 'show' : '' }}" id="sidebarhotels">
+        <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+                <a href="{{ route('hotels.index') }}"
+                   class="nav-link {{ request()->routeIs('hotels.index') ? 'active' : '' }}">
+                   hotels List
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('hotels.create') }}"
+                   class="nav-link {{ request()->routeIs('hotels.create') ? 'active' : '' }}">
+                   hotels create
                 </a>
             </li>
         </ul>

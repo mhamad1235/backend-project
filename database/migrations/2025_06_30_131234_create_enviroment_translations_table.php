@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cabins', function (Blueprint $table) {
+    Schema::create('environment_translations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('environment_id')->constrained()->onDelete('cascade');
+            $table->string('locale')->index();
             $table->string('name');
-            $table->string('phone');
-            $table->decimal('latitude', 10, 7);
-            $table->decimal('longitude', 10, 7);
-            $table->foreignId('city_id')->constrained()->onDelete('cascade'); 
-            $table->timestamps();
+            $table->text('description')->nullable();
+            $table->unique(['environment_id', 'locale']);
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cabins');
+        Schema::dropIfExists('environment_translations');
     }
 };

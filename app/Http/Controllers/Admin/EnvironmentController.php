@@ -4,17 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Cabin;
+use App\Models\Environment;
 use App\Models\Image;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\DataTables;
 use App\Models\City;
-class CabinController extends Controller
+use App\Enums\RestaurantType;
+
+class EnvironmentController extends Controller
 {
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $cabins = Cabin::query()->with('city') // Eager load
+            $cabins = Environment::query()->with('city','translations') // Eager load
             ->when($request->search['value'] ?? null, function ($query, $search) {
                 $query->where('phone', 'like', '%'.$search.'%')
                     ->orWhere('address', 'like', '%'.$search.'%');
@@ -24,8 +26,8 @@ class CabinController extends Controller
             return DataTables::of($cabins)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
-                    $editUrl = route('cabins.edit', $row->id);
-                    $deleteUrl = route('cabins.destroy', $row->id);
+                    $editUrl = route('environments.edit', $row->id);
+                    $deleteUrl = route('environments.destroy', $row->id);
                     
                     return '
                     <div class="dropdown d-inline-block">
@@ -73,11 +75,14 @@ class CabinController extends Controller
                     ? $row->city->getTranslation('name', 'en', true)->name // Spatie example
                     : '-';
             })
+             ->addColumn('name', function ($row) {
+                    return $row->getTranslation('name', 'en', true)->name ?? '-';
+                })
                 ->rawColumns(['action', 'location', 'images', 'city'])
                 ->toJson();
         }
         
-        return view('admin.cabins.index');
+        return view('admin.environments.index');
     }
 
     public function create()
@@ -85,47 +90,56 @@ class CabinController extends Controller
         $cities = City::with(['translations' => function ($query) {
         $query->where('locale', 'en');
         }])->get();
-        return view('admin.cabins.create',compact('cities'));
+        return view('admin.environments.create',compact('cities'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|array', // changed from string
+            'name.*' => 'required|string|max:255', // validate each translation
+            'description' => 'nullable|array',
+            'description.*' => 'nullable|string',
             'phone' => 'required|string|max:20',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'city_id' => 'required|exists:cities,id',
+            'type' => 'required',
         ]);
         
-        $cabin = Cabin::create([
-            'name' => $request->name,
+        $enviroment = Environment::create([
             'phone' => $request->phone,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'city_id' => $request->city_id,
+            'type' => $request->type,
         ]);
-        
+        foreach ($request->name as $locale => $name) {
+        $enviroment->translateOrNew($locale)->name = $name;
+        $enviroment->translateOrNew($locale)->description = $request->description[$locale] ?? null;
+    }
+
+    $enviroment->save();
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('uploads', 's3');
                 
-                $cabin->images()->create([
+                $enviroment->images()->create([
                     'path' => $path
                 ]);
             }
         }
         
-        return redirect()->route('cabins.index')->with('success', 'Cabin created successfully');
+        return redirect()->route('environments.index')->with('success', 'Cabin created successfully');
     }
 
-    public function edit(Cabin $cabin)
+    public function edit(Environment $cabin)
     {
-        return view('admin.cabins.edit', compact('cabin'));
+        return view('admin.environments.edit', compact('cabin'));
     }
 
-    public function update(Request $request, Cabin $cabin)
+    public function update(Request $request, Environment $cabin)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -156,7 +170,7 @@ class CabinController extends Controller
         return redirect()->route('cabins.index')->with('success', 'Cabin updated successfully');
     }
 
-    public function destroy(Cabin $cabin)
+    public function destroy(Environment $cabin)
     {
         // Delete images from S3
         foreach ($cabin->images as $image) {

@@ -63,17 +63,67 @@
                 <form method="POST" action="{{ route('restaurants.store') }}" enctype="multipart/form-data">
                     @csrf
                     
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="name" class="form-label">Restaurant Name *</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
+                     <ul class="nav nav-tabs mb-3" id="langTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="en-tab" data-bs-toggle="tab" data-bs-target="#en" type="button" role="tab">
+                                <i class="bi bi-translate me-1"></i> English
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ku-tab" data-bs-toggle="tab" data-bs-target="#ku" type="button" role="tab">
+                                <i class="bi bi-translate me-1"></i> Kurdish
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ar-tab" data-bs-toggle="tab" data-bs-target="#ar" type="button" role="tab">
+                                <i class="bi bi-translate me-1"></i> Arabic
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="langTabContent">
+                        <!-- English Tab -->
+                        <div class="tab-pane fade show active" id="en" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label">Hotel Name (English) *</label>
+                                <input type="text" class="form-control" name="name[en]" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description (English) *</label>
+                                <textarea class="form-control" name="description[en]" rows="4" required></textarea>
+                            </div>
                         </div>
+                        
+                        <!-- Kurdish Tab -->
+                        <div class="tab-pane fade" id="ku" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label">Hotel Name (Kurdish) *</label>
+                                <input type="text" class="form-control" name="name[ku]" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description (Kurdish) *</label>
+                                <textarea class="form-control" name="description[ku]" rows="4" required></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Arabic Tab -->
+                        <div class="tab-pane fade" id="ar" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label">Hotel Name (Arabic) *</label>
+                                <input type="text" class="form-control" name="name[ar]" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description (Arabic) *</label>
+                                <textarea class="form-control" name="description[ar]" rows="4" required></textarea>
+                            </div>
+                        </div>
+                    </div>
                         
                         <div class="col-12 mb-3">
                             <div class="map-container">
                                 <div class="search-container">
                                     <div class="input-group">
-                                        <input type="text" class="form-control" id="addressSearch" placeholder="Search location...">
+                                        <input name="address" type="text" class="form-control" id="addressSearch" placeholder="Search location...">
                                         <button class="btn btn-primary" type="button" id="searchButton">
                                             <i class="ri-search-line"></i>
                                         </button>

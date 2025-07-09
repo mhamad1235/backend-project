@@ -31,7 +31,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <h5 class="card-title">Cabins</h5>
-                <a href="{{ route('cabins.create') }}" class="btn btn-primary">
+                <a href="{{ route('environments.create') }}" class="btn btn-primary">
                     <i class="ri-add-line me-1 align-bottom"></i> Add New
                 </a>
             </div>
@@ -82,7 +82,7 @@ $(document).ready(function () {
         processing: true,
         serverSide: true,
         ajax: {
-            url: "{{ route('cabins.index') }}",
+            url: "{{ route('environments.index') }}",
             data: function (d) {
                 d.search = $('#search').val();
             }

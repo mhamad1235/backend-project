@@ -13,14 +13,12 @@ return new class extends Migration
     {
         Schema::create('restaurants', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('image')->nullable(); // Store image path or filename
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
-            $table->text('address');
+            $table->text('address')->nullable();
 
-        $table->foreignId('city_id')->constrained()->onDelete('cascade');
-        $table->timestamps();
+            $table->foreignId('city_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
         });
     }
 

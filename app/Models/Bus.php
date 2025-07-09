@@ -4,14 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-class Bus extends Model
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
+use Astrotomic\Translatable\Translatable;
+class Bus extends Model implements TranslatableContract
 {
+    use HasFactory, Translatable;
+    public $translatedAttributes = ['owner_name'];
+    protected $with = ['translations'];
     protected $fillable = [
         'phone',
         'latitude',
         'longitude',
         'address',
-        'owner_name',
         'city_id'
     ];
     

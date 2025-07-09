@@ -14,7 +14,7 @@ class BusController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-              $data = Bus::query()->with('city') // Eager load
+              $data = Bus::query()->with('city','translations') // Eager load
             ->when($request->search['value'] ?? null, function ($query, $search) {
                 $query->where('owner_name', 'like', '%'.$search.'%')
                     ->orWhere('phone', 'like', '%'.$search.'%')
@@ -57,7 +57,10 @@ class BusController extends Controller
                     ? $row->city->getTranslation('name', 'en', true)->name // Spatie example
                     : '-';
             })
-                ->rawColumns(['action', 'location', 'city', 'created_at'])
+            ->addColumn('name', function ($row) {
+            return $row->getTranslation('owner_name', 'en', true)->onwer_name ?? '-';
+                })
+                ->rawColumns(['action', 'location', 'city', 'created_at','name'])
                 ->make(true);
         }
 
@@ -76,19 +79,36 @@ class BusController extends Controller
 
     public function store(Request $request)
     {
+        try {
+            //code...
+        
         $validated = $request->validate([
             'phone' => 'required|string|max:20|unique:buses,phone',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'address' => 'required|string|max:255',
-            'owner_name' => 'required|string|max:255',
+            'name' => 'required|array', // changed from string
+            'name.*' => 'required|string|max:255', 
             'city_id' => 'required|exists:cities,id',
         ]);
        
-        Bus::create($validated);
+       $bus= Bus::create([
+            'phone' => $validated['phone'],
+            'latitude' => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+            'address' => $validated['address'],
+            'city_id' => $validated['city_id'],
+        ]); 
+          foreach ($request->name as $locale => $name) {
+          $bus->translateOrNew($locale)->owner_name = $name;
+          }
 
+         $bus->save();
         return redirect()->route('buses.index')
             ->with('success', 'Bus created successfully.');
+            } catch (\Throwable $th) {
+            dd($th->getMessage());
+        }
     }
 
     public function edit(Bus $bus)

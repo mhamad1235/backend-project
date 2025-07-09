@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('buses', function (Blueprint $table) {
+        Schema::create('environments', function (Blueprint $table) {
             $table->id();
             $table->string('phone');
-            $table->decimal('latitude', 10, 7);  // Enough for GPS coordinates
+            $table->decimal('latitude', 10, 7);
             $table->decimal('longitude', 10, 7);
-            $table->text('address');
+            $table->string('type'); 
             $table->foreignId('city_id')->constrained()->onDelete('cascade'); 
             $table->timestamps();
         });
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('buses');
+        Schema::dropIfExists('environments');
     }
 };

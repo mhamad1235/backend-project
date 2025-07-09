@@ -97,7 +97,7 @@
               </span>
             </div>
             <div class="flex-grow-1 ms-3 overflow-hidden">
-              <p class="text-uppercase fw-semibold text-muted text-truncate mb-3">Total Cabins</p>
+              <p class="text-uppercase fw-semibold text-muted text-truncate mb-3">Total </p>
               <h4 class="fs-4 mb-0">{{$data['total_cabin']}}</h4>
             </div>
           </div>

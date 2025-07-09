@@ -15,7 +15,7 @@ class RestaurantController extends Controller
      public function index(Request $request)
     {
         if ($request->ajax()) {
-            $restaurants = Restaurant::query()->with(['city', 'images'])
+            $restaurants = Restaurant::query()->with(['city', 'images','translations'])
                 ->when($request->search['value'] ?? null, function ($query, $search) {
                     $query->where('name', 'like', '%'.$search.'%')
                           ->orWhere('address', 'like', '%'.$search.'%');
@@ -76,7 +76,10 @@ class RestaurantController extends Controller
                 ->editColumn('created_at', function($row) {
                     return $row->created_at->format('Y-m-d H:i:s');
                 })
-                ->rawColumns(['action', 'location', 'images'])
+                ->addColumn('name', function ($row) {
+                    return $row->getTranslation('name', 'en', true)->name ?? '-';
+                })
+                ->rawColumns(['action', 'location', 'images','name'])
                 ->toJson();
         }
         
@@ -91,19 +94,32 @@ class RestaurantController extends Controller
 
   public function store(Request $request)
 {
+   
     $request->validate([
-        'name' => 'required|string|max:255',
+        'name' => 'required|array', // changed from string
+        'name.*' => 'required|string|max:255', // validate each translation
+        'description' => 'nullable|array',
+        'description.*' => 'nullable|string',
         'images' => 'nullable|array', // Changed to accept multiple images
         'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Validation for each image
         'latitude' => 'nullable|numeric|between:-90,90',
         'longitude' => 'nullable|numeric|between:-180,180',
-        'address' => 'required|string',
+        'address' => 'required',
         'city_id' => 'required|exists:cities,id',
     ]);
 
     // Create restaurant first to get ID
-    $restaurant = Restaurant::create($request->except('images'));
-
+    $restaurant = Restaurant::create([
+        'address' => $request->address ?? null,
+        'latitude' => $request->latitude,
+        'longitude' => $request->longitude,
+        'city_id' => $request->city_id,
+    ]);
+      foreach ($request->name as $locale => $name) {
+        $restaurant->translateOrNew($locale)->name = $name;
+        $restaurant->translateOrNew($locale)->description = $request->description[$locale] ?? null;
+    }
+    $restaurant->save();
     // Handle multiple images
     if ($request->hasFile('images')) {
         foreach ($request->file('images') as $image) {

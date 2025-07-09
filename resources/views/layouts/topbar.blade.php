@@ -101,7 +101,7 @@
         {{-- <div class="dropdown ms-sm-3 header-item topbar-user">
           <button type="button" class="btn" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="d-flex align-items-center">
-              <img class="rounded-circle header-profile-user" src="@if (Auth::user()->avatar != '') {{ URL::asset('images/' . Auth::user()->avatar) }}@else{{ URL::asset('assets/images/users/avatar-1.jpg') }} @endif" alt="Header Avatar">
+              <img class="rounded-circle header-profile-user" src="@if (Auth::user()->avatar != '') {{ URL::asset('images/' . Auth::user()->avatar) }}@else{{ URL::asset('assets/images/logo.jpg') }} @endif" alt="Header Avatar">
               <span class="ms-xl-2 text-start">
                 <span class="d-none d-xl-inline-block fw-semibold user-name-text ms-1">{{ Auth::user()->name }}</span>
                 <span class="d-none d-xl-block fs-12 user-name-sub-text ms-1">Founder</span>
@@ -123,7 +123,7 @@
         <div class="dropdown ms-sm-3 header-item topbar-user">
           <button type="button" class="btn" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="d-flex align-items-center">
-              <img class="rounded-circle header-profile-user" src="" alt="Header Avatar">
+                <img class="rounded-circle header-profile-user" src="{{ URL::asset('assets/images/logo.jpg') }} " alt="Header Avatar">
               <span class="ms-xl-2 text-start">
                 <span class="d-none d-xl-inline-block fw-semibold user-name-text ms-1">{{ Auth::user()->name }}</span>
                 <span class="d-none d-xl-block fs-12 user-name-sub-text ms-1"></span>

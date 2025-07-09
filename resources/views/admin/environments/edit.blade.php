@@ -60,7 +60,7 @@
                 <h4 class="card-title">Edit Cabin</h4>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('cabins.update', $cabin->id) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('environments.update', $cabin->id) }}" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     
