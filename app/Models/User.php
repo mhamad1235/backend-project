@@ -76,5 +76,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Booking::class)
             ->where('bookable_type', Bus::class);
     }
-     
+    
+    public function journeys()
+    {
+        
+    return $this->belongsToMany(Journey::class, 'journey_user')
+                ->withTimestamps()
+                ->withPivot('paid');
+    }
+
 }

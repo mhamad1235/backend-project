@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bookings', function (Blueprint $table) {
-           $table->id();
+            $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->decimal('amount', 10, 2)->default('0');
             $table->enum('status', ['pending', 'confirmed', 'rejected', 'cancelled', 'completed'])->default('pending');
             $table->enum('payment_status', ['pending', 'paid', 'failed', 'refunded'])->default('pending');
             $table->string('payment_method')->nullable();
             $table->string('transaction_id')->nullable();
-            $table->dateTime('booking_date');
+            $table->dateTime('booking_date')->nullable();;
             $table->dateTime('start_time');
-            $table->dateTime('end_time')->nullable();
+            $table->dateTime('end_time');
             $table->text('notes')->nullable();
             
             // Polymorphic relationship

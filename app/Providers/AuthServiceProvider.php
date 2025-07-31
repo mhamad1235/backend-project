@@ -6,13 +6,16 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Gate;
 use App\Models\Hotel;
 use App\Policies\HotelPolicy;
-
+use App\Models\Journey;
+use App\Policies\JourneyPolicy;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
      */
-
+    protected $policies = [
+    Journey::class => JourneyPolicy::class,
+    ];
 
     public function register(): void
     {

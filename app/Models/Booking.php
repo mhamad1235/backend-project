@@ -24,8 +24,7 @@ class Booking extends Model
 
     protected $casts = [
         'booking_date' => 'datetime',
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
+    
     ];
      public function bookable(): MorphTo
     {
@@ -35,5 +34,30 @@ class Booking extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+     public function hotelDetail()
+    {
+        return $this->hasOne(HotelBookingDetail::class);
+    }
+
+    public function busDetail()
+    {
+        return $this->hasOne(BusBookingDetail::class);
+    }
+
+    public function environmentDetail()
+    {
+        return $this->hasOne(EnvironmentBookingDetail::class);
+    }
+
+    // Get type-specific details dynamically
+    public function getDetailAttribute()
+    {
+        return match($this->bookable_type) {
+            Hotel::class => $this->hotelDetail,
+            Bus::class => $this->busDetail,
+            Environment::class => $this->environmentDetail,
+            default => null
+        };
     }
 }

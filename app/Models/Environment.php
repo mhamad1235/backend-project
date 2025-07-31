@@ -19,6 +19,14 @@ class Environment extends Model implements TranslatableContract
      protected $casts = [
     'type' => RestaurantType::class,
     ];
+
+     public static $hourlyPrices = [
+        4 => 100,   // price for 4 hours
+        8 => 180,   // price for 8 hours
+        12 => 250,  // price for 12 hours
+    ];
+
+    public static $dailyPrice = 400; // price per full day (24h)
     public function images()
     {
         return $this->morphMany(Image::class, 'imageable');
@@ -27,4 +35,26 @@ class Environment extends Model implements TranslatableContract
     { 
     return $this->belongsTo(City::class);
     }
+    
+    public function feedbacks()
+    {
+    return $this->morphMany(Feedback::class, 'feedbackable');
+    }
+
+    public function bookings()
+    {
+    return $this->morphMany(Booking::class, 'bookable');
+    }
+
+    public function unavailableSlots()
+    {
+    return $this->morphMany(UnavailableSlot::class, 'bookable');
+    }
+    
+    public function getAverageRatingAttribute()
+     {
+      $avg = $this->feedbacks()->avg('rating');
+      return $avg ? number_format($avg, 1) : 0;
+    }
+  
 }

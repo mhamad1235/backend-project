@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\EnvironmentController;
 use App\Http\Controllers\Admin\RestaurantController;
 use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\HotelController;
+use App\Http\Controllers\Admin\FeedbackController;
+
 Route::get('/', function () {
     return redirect('login');
 });
@@ -25,6 +27,7 @@ Auth::routes();
 
 Route::middleware('auth:admin')->group(function () {
     Route::get('/dashboard', [HomeController::class, 'root'])->name(('root'));
+    Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
     Route::resource("users", UserController::class);
     Route::resource("cities", CityController::class);
     Route::get('/upload', [FileUploadController::class, 'index'])->name('images.index');
@@ -57,7 +60,9 @@ Route::prefix('restaurants/{restaurant}/foods')->group(function () {
 });
  
   Route::resource('hotels', HotelController::class);
-
+    Route::get('/feedbacks', [FeedbackController::class, 'index'])->name('admin.feedbacks.index');
+    Route::put('/feedbacks/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('admin.feedbacks.update-status');
+        Route::delete('/feedbacks/{feedback}', [FeedbackController::class, 'destroy'])->name('admin.feedbacks.destroy');
 });
 Route::get('/test-websocket', function() {
     return view('websocket-test');
@@ -71,4 +76,14 @@ Route::get('/trigger', function () {
     broadcast(new NewNotificationEvent("Data changed at: ".now()));
     
     return "Event fired! Check logs and Reverb server output.";
+});
+
+    Route::get('/test', [HomeController::class, 'test'])->name(('test'));
+
+    // Environment Slots Management
+Route::prefix('environments/{environment}/slots')->group(function () {
+    Route::get('/', [EnvironmentController::class, 'slotsIndex'])->name('environments.slots.index');
+    Route::post('/', [EnvironmentController::class, 'storeSlot'])->name('environments.slots.store');
+    Route::put('/{slot}', [EnvironmentController::class, 'updateSlot'])->name('environments.slots.update');
+    Route::delete('/{slot}', [EnvironmentController::class, 'destroySlot'])->name('environments.slots.destroy');
 });

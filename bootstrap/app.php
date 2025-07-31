@@ -13,6 +13,7 @@ use App\Http\Middleware\Localization;
 use App\Http\Middleware\SanitizeInput;
 use App\Http\Middleware\SetViewTitle;
 use App\Http\Middleware\EnsureAccountRole;
+use App\Http\Middleware\CorsMiddleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->api([
+            CorsMiddleware::class,
             AlwaysAcceptJson::class,
             ApiLocalization::class,
             EnsureSystemKey::class,

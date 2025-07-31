@@ -26,6 +26,15 @@ class Hotel extends Model implements TranslatableContract
     { 
     return $this->belongsTo(City::class);
     }
-  
-
+    
+    public function feedbacks()
+    {
+    return $this->morphMany(Feedback::class, 'feedbackable');
+    }
+    
+     public function getAverageRatingAttribute()
+     {
+      $avg = $this->feedbacks()->avg('rating');
+      return $avg ? number_format($avg, 1) : 0;
+    }
 }

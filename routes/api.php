@@ -20,6 +20,7 @@ use App\Http\Middleware\EnsureAccountRole;
 use App\Http\Controllers\Api\Auth\FIBPaymentController;
 use App\Events\NewNotificationEvent;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\JourneyController;
 
 
 Route::group(["prefix" => "auth"], function () {
@@ -68,7 +69,7 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
          Route::post('/bookings/buses/{bus}', [BookingController::class, 'createBooking']);
          Route::get('/bookings', [BookingController::class, 'getUserBookings']);
          Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelBooking']);
-       
+         
     });
 Route::middleware(['auth:account', 'role:motel'])->group(function () {
     Route::get('/motel/dashboard', function () {
@@ -78,9 +79,39 @@ Route::middleware(['auth:account', 'role:motel'])->group(function () {
     });
 });
 
+
+
 Route::post('/test-image', [AccountAuthController::class, 'testImage'])->name('api.test.image');
 
 // Route::get('/test-event', function () {
 //  broadcast(new NewNotificationEvent('🚨 New message'));
 //     return 'Sent!';
 // });
+  Route::post('/bookings/{booking}', [BookingController::class, 'store']);
+        
+Route::post('fib/first', [BookingController::class, 'first'])->withoutMiddleware(['auth:sanctum', 'throttle']);
+Route::post('fib/second', [BookingController::class, 'second'])->withoutMiddleware(['auth:sanctum', 'throttle']);
+Route::post('fib/third/{paymentId}', [BookingController::class, 'third'])->withoutMiddleware(['auth:sanctum', 'throttle']);
+Route::post('fib/callback', [BookingController::class, 'callback'])->withoutMiddleware(['auth:sanctum', 'throttle']);
+Route::post('fib/payment-complete', [BookingController::class, 'callback'])->withoutMiddleware(['auth:sanctum', 'throttle']);
+
+
+
+
+/////////// Tourist Routes
+Route::middleware(['auth:account', 'role:tourist'])->group(function () {
+    Route::get('/tourist/dashboard/{id}', [BookingController::class, 'touristDashboard']);
+});
+
+
+
+////////// Restaurant Routes
+Route::middleware(['auth:account', 'role:tourist'])->group(function () {
+    
+    Route::get('/journeys', [JourneyController::class, 'index']);
+    Route::get('/journeys/{id}', [JourneyController::class, 'show']);
+    Route::post('/journeys', [JourneyController::class, 'store']);
+    Route::post('/journeys/{id}', [JourneyController::class, 'update']);
+    Route::delete('/journeys/{id}', [JourneyController::class, 'destroy']);
+
+});

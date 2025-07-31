@@ -266,7 +266,7 @@
        href="#sidebarenvironment" data-bs-toggle="collapse" role="button"
        aria-expanded="{{ request()->routeIs('environments.*') ? 'true' : 'false' }}"
        aria-controls="sidebarenvironment">
-       <i class="ri-hotel-bed-line"></i> <span>environment</span>
+  <i class="ri-earth-line"></i> <span>Environment</span>
     </a>
     <div class="menu-dropdown collapse {{ request()->routeIs('environments.*') ? 'show' : '' }}" id="sidebarenvironment">
         <ul class="nav nav-sm flex-column">
@@ -290,7 +290,7 @@
        href="#sidebarhotels" data-bs-toggle="collapse" role="button"
        aria-expanded="{{ request()->routeIs('hotels.*') ? 'true' : 'false' }}"
        aria-controls="sidebarhotels">
-       <i class="ri-hotel-bed-line"></i> <span>hotels</span>
+       <i class="ri-hotel-line"></i> <span>Hotels</span>
     </a>
     <div class="menu-dropdown collapse {{ request()->routeIs('hotels.*') ? 'show' : '' }}" id="sidebarhotels">
         <ul class="nav nav-sm flex-column">
@@ -315,7 +315,7 @@
        href="#sidebarrestaurants" data-bs-toggle="collapse" role="button"
        aria-expanded="{{ request()->routeIs('restaurants.*') ? 'true' : 'false' }}"
        aria-controls="sidebarrestaurants">
-       <i class="ri-hotel-bed-line"></i> <span>Restaurants</span>
+   <i class="ri-restaurant-line"></i> <span>Restaurants</span>
     </a>
     <div class="menu-dropdown collapse {{ request()->routeIs('restaurants.*') ? 'show' : '' }}" id="sidebarrestaurants">
         <ul class="nav nav-sm flex-column">
@@ -331,6 +331,26 @@
                    restaurants create
                 </a>
             </li>
+        </ul>
+    </div>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link menu-link {{ request()->routeIs('feedback.*') ? 'collapsed active' : '' }}"
+       href="#sidebarrestaurants" data-bs-toggle="collapse" role="button"
+       aria-expanded="{{ request()->routeIs('restaurants.*') ? 'true' : 'false' }}"
+       aria-controls="sidebarrestaurants">
+      <i class="ri-chat-3-line"></i> <span>Feedbacks</span>
+    </a>
+    <div class="menu-dropdown collapse {{ request()->routeIs('feedbacks.*') ? 'show' : '' }}" id="sidebarrestaurants">
+        <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+                <a href="{{ route('admin.feedbacks.index') }}"
+                   class="nav-link {{ request()->routeIs('admin.feedbacks.index') ? 'active' : '' }}">
+                   Feedback List
+                </a>
+            </li>
+            
         </ul>
     </div>
 </li>

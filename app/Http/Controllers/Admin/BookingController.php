@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Bus;
 use App\Models\User;
+use App\Models\Hotel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;

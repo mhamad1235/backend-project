@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\DataTables;
 use App\Models\City;
 use App\Enums\RestaurantType;
+use App\Models\UnavailableSlot;
 
 class EnvironmentController extends Controller
 {
@@ -25,26 +26,31 @@ class EnvironmentController extends Controller
             
             return DataTables::of($cabins)
                 ->addIndexColumn()
-                ->addColumn('action', function ($row) {
-                    $editUrl = route('environments.edit', $row->id);
-                    $deleteUrl = route('environments.destroy', $row->id);
-                    
-                    return '
-                    <div class="dropdown d-inline-block">
-                        <button class="btn btn-soft-secondary btn-sm dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="ri-more-fill align-middle"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="'.$editUrl.'"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edit</a></li>
-                            <li class="dropdown-divider"></li>
-                            <li>
-                                <a href="javascript:void(0)" class="dropdown-item delete-btn" data-id="'.$row->id.'" data-url="'.$deleteUrl.'">
-                                    <i class="ri-delete-bin-fill text-muted me-2 align-bottom"></i> Delete
-                                </a>
-                            </li>
-                        </ul>
-                    </div>';
-                })
+            ->addColumn('action', function ($row) {
+    $editUrl = route('environments.edit', $row->id);
+    $deleteUrl = route('environments.destroy', $row->id);
+    $slotsUrl = route('environments.slots.index', $row->id); // NEW
+    
+    return '
+    <div class="dropdown d-inline-block">
+        <button class="btn btn-soft-secondary btn-sm dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="ri-more-fill align-middle"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="'.$editUrl.'"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edit</a></li>
+            <!-- NEW SLOT MANAGEMENT LINK -->
+            <li><a class="dropdown-item" href="'.$slotsUrl.'">
+                <i class="ri-time-line align-bottom me-2 text-muted"></i> Manage Slots
+            </a></li>
+            <li class="dropdown-divider"></li>
+            <li>
+                <a href="javascript:void(0)" class="dropdown-item delete-btn" data-id="'.$row->id.'" data-url="'.$deleteUrl.'">
+                    <i class="ri-delete-bin-fill text-muted me-2 align-bottom"></i> Delete
+                </a>
+            </li>
+        </ul>
+    </div>';
+})
                 ->addColumn('location', function ($row) {
                     return '
                     <a href="https://www.google.com/maps?q='.$row->latitude.','.$row->longitude.'" 
@@ -191,4 +197,42 @@ class EnvironmentController extends Controller
         
         return response()->json(['success' => true]);
     }
+    public function slotsIndex(Environment $environment)
+{
+    $slots = $environment->unavailableSlots()->latest()->get();
+    return view('admin.environments.slots', compact('environment', 'slots'));
+}
+
+public function storeSlot(Request $request, Environment $environment)
+{
+    $request->validate([
+        'start_time' => 'required|date',
+        'end_time' => 'required|date|after:start_time',
+    ]);
+
+    $environment->unavailableSlots()->create([
+        'start_time' => $request->start_time,
+        'end_time' => $request->end_time,
+        'unavailable_date' => \Carbon\Carbon::parse($request->start_time)->format('Y-m-d'),
+    ]);
+
+    return redirect()->back()->with('success', 'Slot added successfully');
+}
+
+public function updateSlot(Request $request, Environment $environment, UnavailableSlot $slot)
+{
+    $request->validate([
+        'start_time' => 'required|date',
+        'end_time' => 'required|date|after:start_time',
+    ]);
+
+    $slot->update([
+        'start_time' => $request->start_time,
+        'end_time' => $request->end_time,
+        'unavailable_date' => \Carbon\Carbon::parse($request->start_time)->format('Y-m-d'),
+    ]);
+
+    return redirect()->back()->with('success', 'Slot updated successfully');
+}
+
 }

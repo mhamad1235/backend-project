@@ -198,22 +198,22 @@ public function refreshToken(Request $request)
 public function generateTokens($user)
 {
     $accessTokenExpireAt = now()->addMinutes(15);
-    $refreshTokenExpireAt = now()->addDays(60); // 60 days
+    $refreshTokenExpireAt = now()->addDays(60); 
 
-    // Create access token
+    
     $accessTokenInstance = $user->createToken('auth_token');
     $accessToken = $accessTokenInstance->plainTextToken;
 
-    // Set custom expiration
+    
     $user->tokens()
         ->where('id', $accessTokenInstance->accessToken->id)
         ->update(['expires_at' => $accessTokenExpireAt]);
 
-    // Create refresh token
+    
     $refreshTokenInstance = $user->createToken('refresh_token');
     $refreshToken = $refreshTokenInstance->plainTextToken;
 
-    // Set custom expiration
+    
     $user->tokens()
         ->where('id', $refreshTokenInstance->accessToken->id)
         ->update(['expires_at' => $refreshTokenExpireAt]);

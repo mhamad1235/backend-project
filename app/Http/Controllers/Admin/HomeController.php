@@ -13,7 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
-
+use App\Models\Booking;
+use App\Models\Hotel;
 
 class HomeController extends Controller
 {
@@ -39,7 +40,11 @@ class HomeController extends Controller
         ];
         return view('index', compact('data'));
     }
-
+    public function  logout(Request $request)
+    {
+        auth()->logout();
+        return redirect()->route('login');
+    }
     public function markNotification(Request $request)
     {
         auth()->user()
@@ -174,4 +179,14 @@ class HomeController extends Controller
             }
         }
     }
+  public function test(){
+    $environment = Environment::find(1);
+$environment->feedbacks()->create([
+    'rating' => 5,
+    'comment' => 'Very clean and peaceful',
+    // 'status' will default to 'hide'
+]);
+
+  }
+ 
 }

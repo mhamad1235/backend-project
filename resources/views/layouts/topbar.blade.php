@@ -51,18 +51,12 @@
 
         <div class="dropdown topbar-head-dropdown header-item ms-1">
           <button type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            @switch(Session::get("lang"))
-              @case('ku')
-                <img src="{{ URL::asset('assets/images/flags/hu.svg') }}" class="rounded" alt="Header Language" height="20">
-              @break
+          
+           
 
-              @case('ar')
-                <img src="{{ URL::asset('assets/images/flags/iq.svg') }}" class="rounded" alt="Header Language" height="20">
-              @break
-
-              @default
+           
                 <img src="{{ URL::asset('assets/images/flags/us.svg') }}" class="rounded" alt="Header Language" height="20">
-            @endswitch
+         
           </button>
           <div class="dropdown-menu dropdown-menu-end">
 
@@ -72,17 +66,17 @@
               <span class="align-middle">English</span>
             </a>
 
-            <!-- item-->
-            <a href="{{ url('index/ku') }}" class="dropdown-item notify-item language" data-lang="sp" title="Spanish">
+           
+            <!-- <a href="{{ url('index/ku') }}" class="dropdown-item notify-item language" data-lang="sp" title="Spanish">
               <img src="{{ URL::asset('assets/images/flags/hu.svg') }}" alt="user-image" class="me-2 rounded" height="20">
               <span class="align-middle">Kurdish</span>
             </a>
 
-            <!-- item-->
+         
             <a href="{{ url('index/ar') }}" class="dropdown-item notify-item language" data-lang="sp" title="Spanish">
               <img src="{{ URL::asset('assets/images/flags/iq.svg') }}" alt="user-image" class="me-2 rounded" height="20">
               <span class="align-middle">Arabic</span>
-            </a>
+            </a> -->
           </div>
         </div>
 
@@ -103,7 +97,7 @@
             <span class="d-flex align-items-center">
               <img class="rounded-circle header-profile-user" src="@if (Auth::user()->avatar != '') {{ URL::asset('images/' . Auth::user()->avatar) }}@else{{ URL::asset('assets/images/logo.jpg') }} @endif" alt="Header Avatar">
               <span class="ms-xl-2 text-start">
-                <span class="d-none d-xl-inline-block fw-semibold user-name-text ms-1">{{ Auth::user()->name }}</span>
+                <span class="d-none d-xl-inline-block fw-semibold user-name-text ms-1"></span>
                 <span class="d-none d-xl-block fs-12 user-name-sub-text ms-1">Founder</span>
               </span>
             </span>
@@ -113,7 +107,7 @@
             <h6 class="dropdown-header">Welcome Anna!</h6>
             <a class="dropdown-item" href="pages-profile"><i class="mdi mdi-account-circle text-muted fs-16 me-1 align-middle"></i> <span class="align-middle">Profile</span></a>
             <a class="dropdown-item" href="auth-lockscreen-basic"><i class="mdi mdi-lock text-muted fs-16 me-1 align-middle"></i> <span class="align-middle">Lock screen</span></a>
-            <a class="dropdown-item" href="javascript:void();" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="bx bx-power-off font-size-16 me-1 align-middle"></i> <span key="t-logout">@lang('translation.logout')</span></a>
+            <a class="dropdown-item" href="javascript:void();" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="bx bx-power-off font-size-16 me-1 align-middle"></i> <span key="t-logout"></span></a>
             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
               @csrf
             </form>
@@ -125,14 +119,14 @@
             <span class="d-flex align-items-center">
                 <img class="rounded-circle header-profile-user" src="{{ URL::asset('assets/images/logo.jpg') }} " alt="Header Avatar">
               <span class="ms-xl-2 text-start">
-                <span class="d-none d-xl-inline-block fw-semibold user-name-text ms-1">{{ Auth::user()->name }}</span>
+                <span class="d-none d-xl-inline-block fw-semibold user-name-text ms-1"></span>
                 <span class="d-none d-xl-block fs-12 user-name-sub-text ms-1"></span>
               </span>
             </span>
           </button>
           <div class="dropdown-menu dropdown-menu-end">
             <!-- item-->
-            <h6 class="dropdown-header">Welcome {{ auth()->user()->name }} </h6>
+            <h6 class="dropdown-header">Welcome </h6>
             <a class="dropdown-item" href=""><i class="mdi mdi-account-circle text-muted fs-16 me-1 align-middle"></i> <span class="align-middle">Profile</span></a>
             {{-- <a class="dropdown-item" href="auth-lockscreen-basic"><i class="mdi mdi-lock text-muted fs-16 me-1 align-middle"></i> <span class="align-middle">Lock screen</span></a> --}}
             <a class="dropdown-item" href="javascript:void();" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="bx bx-power-off font-size-16 me-1 align-middle"></i> <span key="t-logout">@lang('translation.logout')</span></a>
