@@ -265,7 +265,7 @@ public function second(Request $request)
     $userId = 1; 
     $journeyId = $request->input('journey_id');
 
-    $callbackUrl = "https://soft-lies-rule.loca.lt/api/fib/callback";
+    $callbackUrl = "https://soft-lies-rule.loca.lt/api/callback";
 
     $paymentPayload = [
         'monetaryValue' => [
@@ -325,31 +325,54 @@ public function second(Request $request)
 
     return response()->json($data);
 }
-
-public function callback(Request $request)
+public function refund($paymentId)
 {
-    $data = $request->only(['id', 'status']);
-    
-    if (!isset($data['id'], $data['status'])) {
-        // Missing required data
-        return response()->json(['error' => 'Invalid callback data'], 406);
-    }
+    $client = new \GuzzleHttp\Client();
 
-    // Find your payment record by paymentId
-  
-    if ($data['status'] === 'SUCCESS') {
-        // Perform your business logic here, e.g.:
-       User::where('id',1)->update(['name' => "FIB"]);
+    // Step 1: Get access token (you can reuse your logic from first() or third())
+    $tokenResponse = $client->post('https://fib.stage.fib.iq/auth/realms/fib-online-shop/protocol/openid-connect/token', [
+        'form_params' => [
+            'grant_type' => 'client_credentials',
+            'client_id' => 'mp-it',
+            'client_secret' => '2d9d9e4b-8b29-4d74-a393-9b9684975512',
+        ],
+    ]);
 
+    $accessToken = json_decode($tokenResponse->getBody(), true)['access_token'];
 
-        // You can add other logic like sending emails, logging, etc.
-    }
+    // Step 2: Send refund request
+    $response = $client->post("https://fib.stage.fib.iq/protected/v1/payments/{$paymentId}/refund", [
+        'headers' => [
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Accept' => 'application/json',
+        ],
+    ]);
 
-    // Respond with 202 Accepted to acknowledge
-    return response()->json(['message' => 'Payment status updated'], 202);
+    $data = json_decode($response->getBody(), true);
+
+    return response()->json($data);
 }
 
 
+public function handleCallback(Request $request)
+{
+    $payload = $request->all();
+
+    $paymentId = $payload['id'] ?? null;
+    $status = $payload['status'] ?? null;
+
+    if (!$paymentId || !$status) {
+        return response()->json(['error' => 'Invalid callback payload'], 400);
+    }
+
+    try {
+        // Implement your callback handling logic
+        return response()->json(['message' => 'Callback processed successfully']);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Failed to process callback: ' . $e->getMessage()], 500);
+    }
+
+}
     public function touristDashboard($id){
         try {
        $journey = Journey::findOrFail($id); 

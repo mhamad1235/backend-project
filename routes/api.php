@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\Auth\FIBPaymentController;
 use App\Events\NewNotificationEvent;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\JourneyController;
+use App\Http\Controllers\Api\RestaurantController;
 
 
 Route::group(["prefix" => "auth"], function () {
@@ -92,20 +93,25 @@ Route::post('/test-image', [AccountAuthController::class, 'testImage'])->name('a
 Route::post('fib/first', [BookingController::class, 'first'])->withoutMiddleware(['auth:sanctum', 'throttle']);
 Route::post('fib/second', [BookingController::class, 'second'])->withoutMiddleware(['auth:sanctum', 'throttle']);
 Route::post('fib/third/{paymentId}', [BookingController::class, 'third'])->withoutMiddleware(['auth:sanctum', 'throttle']);
-Route::post('fib/callback', [BookingController::class, 'callback'])->withoutMiddleware(['auth:sanctum', 'throttle']);
+Route::post('callback', [BookingController::class, 'callback'])->withoutMiddleware(['auth:sanctum', 'throttle']);
+Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund'])->withoutMiddleware(['auth:sanctum', 'throttle']);
 Route::post('fib/payment-complete', [BookingController::class, 'callback'])->withoutMiddleware(['auth:sanctum', 'throttle']);
 
 
 
 
-/////////// Tourist Routes
-Route::middleware(['auth:account', 'role:tourist'])->group(function () {
-    Route::get('/tourist/dashboard/{id}', [BookingController::class, 'touristDashboard']);
+/////////// Restarant Routes
+Route::middleware(['auth:account', 'role:restaurant'])->group(function () {
+    Route::get('/restaurants/{id}', [RestaurantController::class, 'show']);
+    Route::post('/restaurants', [RestaurantController::class, 'store']);
+    Route::delete('/restaurants/{id}', [RestaurantController::class, 'destroy']);
+    
+     
 });
 
 
 
-////////// Restaurant Routes
+///////// Journey Routes
 Route::middleware(['auth:account', 'role:tourist'])->group(function () {
     
     Route::get('/journeys', [JourneyController::class, 'index']);

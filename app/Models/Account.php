@@ -31,4 +31,10 @@ class Account extends Authenticatable
     {
     return $this->hasMany(Journey::class, 'tourist_id');
     }
+    
+    public function restaurant()
+    {
+    return $this->hasOne(Restaurant::class);
+    }
+
 }

@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->string('name');
                 $table->string('phone')->unique();
                 $table->string('password');
-                $table->enum('role_type', ['hotel', 'motel', 'agency','tourist'])->default('hotel');
+                $table->enum('role_type', ['hotel','tourist','restaurant'])->default(null);
                 $table->enum('status', ['active', 'inactive'])->default('active');
                 $table->timestamps();
             });
