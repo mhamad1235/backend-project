@@ -70,9 +70,21 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
          Route::post('/bookings/buses/{bus}', [BookingController::class, 'createBooking']);
          Route::get('/bookings', [BookingController::class, 'getUserBookings']);
          Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelBooking']);
-         
+            
+
+
+
+         Route::post('fib/first', [BookingController::class, 'first']);
+         Route::post('join/journey/{id}', [BookingController::class, 'second']);
+         Route::post('fib/third/{paymentId}', [BookingController::class, 'third']);
+       
+         Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund']);
+         Route::post('fib/payment-complete', [BookingController::class, 'callback']);
     });
-Route::middleware(['auth:account', 'role:motel'])->group(function () {
+
+
+
+    Route::middleware(['auth:account', 'role:motel'])->group(function () {
     Route::get('/motel/dashboard', function () {
         return response()->json([
             'message' => 'Welcome to the Motel dashboard!',
@@ -88,36 +100,34 @@ Route::post('/test-image', [AccountAuthController::class, 'testImage'])->name('a
 //  broadcast(new NewNotificationEvent('🚨 New message'));
 //     return 'Sent!';
 // });
-  Route::post('/bookings/{booking}', [BookingController::class, 'store']);
+Route::post('/bookings/{booking}', [BookingController::class, 'store']);
         
-Route::post('fib/first', [BookingController::class, 'first'])->withoutMiddleware(['auth:sanctum', 'throttle']);
-Route::post('fib/second', [BookingController::class, 'second'])->withoutMiddleware(['auth:sanctum', 'throttle']);
-Route::post('fib/third/{paymentId}', [BookingController::class, 'third'])->withoutMiddleware(['auth:sanctum', 'throttle']);
-Route::post('callback', [BookingController::class, 'callback'])->withoutMiddleware(['auth:sanctum', 'throttle']);
-Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund'])->withoutMiddleware(['auth:sanctum', 'throttle']);
-Route::post('fib/payment-complete', [BookingController::class, 'callback'])->withoutMiddleware(['auth:sanctum', 'throttle']);
+
 
 
 
 
 /////////// Restarant Routes
 Route::middleware(['auth:account', 'role:restaurant'])->group(function () {
-    Route::get('/restaurants/{id}', [RestaurantController::class, 'show']);
-    Route::post('/restaurants', [RestaurantController::class, 'store']);
-    Route::delete('/restaurants/{id}', [RestaurantController::class, 'destroy']);
-    
-     
+    Route::get('/restaurants/{id}'      ,   [RestaurantController::class, 'show']);
+    Route::post('/restaurants'          ,   [RestaurantController::class, 'store']);
+    Route::delete('/restaurants/{id}'   ,   [RestaurantController::class, 'destroy']);
+    Route::post('/restaurants/food'     ,   [RestaurantController::class, 'storeFood']);
+    Route::delete('/restaurant/food/{id}',  [RestaurantController::class, 'deleteFood']);
+    Route::get('/restaurant/food/{id}' ,    [RestaurantController::class, 'showFood']);
+    Route::post('/restaurant/food/{id}',   [RestaurantController::class, 'updateFood']);
+    Route::get('restaurant/food'        ,   [RestaurantController::class, 'foods']);
 });
 
 
 
 ///////// Journey Routes
 Route::middleware(['auth:account', 'role:tourist'])->group(function () {
-    
     Route::get('/journeys', [JourneyController::class, 'index']);
     Route::get('/journeys/{id}', [JourneyController::class, 'show']);
     Route::post('/journeys', [JourneyController::class, 'store']);
     Route::post('/journeys/{id}', [JourneyController::class, 'update']);
     Route::delete('/journeys/{id}', [JourneyController::class, 'destroy']);
-
 });
+
+  Route::post('callback', [BookingController::class, 'callback']);

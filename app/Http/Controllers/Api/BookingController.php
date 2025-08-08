@@ -8,6 +8,8 @@ use App\Models\Bus;
 use App\Models\Booking;
 use App\Models\Hotel;
 use App\Models\User;
+use App\Models\Payment;
+use App\Models\JourneyUser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use App\Events\NewNotificationEvent;
@@ -17,6 +19,7 @@ use App\Models\Environment;
 use App\Models\Journey;
 use FirstIraqiBank\FIBPaymentSDK\Services\FIBPaymentIntegrationService;
 use App\Enums\RoleType;
+use App\Services\FIBPaymentService;
 
 class BookingController extends Controller
 {
@@ -245,57 +248,54 @@ public function store(Request $request)
         return response()->json(['message' => 'Validation failed: ' . $e->getMessage()], 422);
     }
 }
-  public function first(){
-    $client = new \GuzzleHttp\Client();
-    $response = $client->post('https://fib.stage.fib.iq/auth/realms/fib-online-shop/protocol/openid-connect/token', [
-    'form_params' => [
-        'grant_type' => 'client_credentials',
-        'client_id' => 'mp-it', 
-        'client_secret' => '2d9d9e4b-8b29-4d74-a393-9b9684975512',
-    ],
-]);
+//   public function first(){
+//     $client = new \GuzzleHttp\Client();
+//     $response = $client->post('https://fib.stage.fib.iq/auth/realms/fib-online-shop/protocol/openid-connect/token', [
+//     'form_params' => [
+//         'grant_type' => 'client_credentials',
+//         'client_id' => 'mp-it', 
+//         'client_secret' => '2d9d9e4b-8b29-4d74-a393-9b9684975512',
+//     ],
+// ]);
 
-$data = json_decode($response->getBody(), true);
-$accessToken = $data['access_token'];
+// $data = json_decode($response->getBody(), true);
+// $accessToken = $data['access_token'];
 
- return response()->json(['access_token' => $accessToken]);
-  }
-public function second(Request $request)
+//  return response()->json(['access_token' => $accessToken]);
+//   }
+public function second(Request $request,$id,FIBPaymentService $service)
 {
-    $userId = 1; 
-    $journeyId = $request->input('journey_id');
-
-    $callbackUrl = "https://soft-lies-rule.loca.lt/api/callback";
+    
+    $userId = auth::id(); 
+    $price=Journey::find($id)->price;
 
     $paymentPayload = [
         'monetaryValue' => [
-            'amount' => 10000,
+            'amount' => $price,
             'currency' => 'IQD',
         ],
         'description' => 'Journey Payment',
-        'callbackUrl' => $callbackUrl,
-        'redirectUri' => 'https://soft-lies-rule.loca.lt/api/fib/payment-complete',
+        'statusCallbackUrl' => "https://176627c2ea98.ngrok-free.app/api/callback",
+        'redirectUri' => 'https://176627c2ea98.ngrok-free.app/api/fib/payment-complete',
         'expiresIn' => 'PT2H',
         'refundableFor' => 'PT48H',
         'category' => 'ECOMMERCE',
     ];
 
-    $client = new \GuzzleHttp\Client();
+   
+    $response = $service->createPayment($paymentPayload);
 
-    $accessToken = $request->bearerToken();
 
-    $response = $client->post('https://fib.stage.fib.iq/protected/v1/payments', [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $accessToken,
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ],
-        'json' => $paymentPayload,
+    $payment = Payment::create([
+        'paymentable_id' => $id,
+        'paymentable_type' => Journey::class,
+        'user_id' => $userId,
+        'fib_payment_id' => $response['paymentId'],
+        'amount' => $paymentPayload['monetaryValue']['amount'],
+        'status' => 'pending',
+        'fib_response' => $response,
     ]);
-
-    $paymentData = json_decode($response->getBody(), true);
-
-    return response()->json($paymentData);
+    return response()->json($response);
 }
 
   public function third($paymentId)
@@ -354,7 +354,7 @@ public function refund($paymentId)
 }
 
 
-public function handleCallback(Request $request)
+public function callback(Request $request)
 {
     $payload = $request->all();
 
@@ -366,12 +366,33 @@ public function handleCallback(Request $request)
     }
 
     try {
-        // Implement your callback handling logic
-        return response()->json(['message' => 'Callback processed successfully']);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Failed to process callback: ' . $e->getMessage()], 500);
+    $payment = Payment::where('fib_payment_id', $paymentId)->first();
+
+    if (!$payment) {
+        return response()->json(['error' => 'Payment not found.'], 404);
     }
 
+   
+
+    JourneyUser::create([
+        'user_id'    => $payment->user_id,
+        'journey_id' => $payment->paymentable_id,
+        'paid'       => true,
+    ]);
+
+    return response()->json(['message' => 'Callback processed successfully.'], 200);
+
+} catch (\Throwable $e) {
+    return response()->json([
+        'error' => 'Failed to process callback.',
+        'details' => $e->getMessage()
+    ], 500);
+}
+
+
+}
+public function payment(Request $request){
+    
 }
     public function touristDashboard($id){
         try {

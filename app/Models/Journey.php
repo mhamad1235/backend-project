@@ -23,9 +23,21 @@ class Journey extends Model implements TranslatableContract
         return $this->belongsTo(Account::class, 'tourist_id');
     }
 
-      public function images()
-{
+    public function images()
+    {
     return $this->morphMany(Image::class, 'imageable');
-}
+    }
+
+    public function users()
+     {
+      return $this->belongsToMany(User::class)
+                 ->withPivot('paid') 
+                 ->withTimestamps();
+     }
+     public function journeyUsers()
+     {
+      return $this->hasMany(JourneyUser::class);
+     }
+
 
 }

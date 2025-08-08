@@ -39,5 +39,14 @@ return [
     'key' => env('OTPIQ_API_KEY'),
     'url' => env('OTPIQ_API_URL'),
 ],
+    
+    'fib' => [
+    'client_id' => env('FIB_CLIENT_ID'),
+    'client_secret' => env('FIB_CLIENT_SECRET'),
+    'base_url' => env('FIB_BASE_URL', 'https://fib.stage.fib.iq'),
+    
+    ],
+
+
 
 ];

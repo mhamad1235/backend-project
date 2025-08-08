@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->decimal('price', 8, 2);
             $table->enum('category', ['popular', 'starters', 'mains', 'drinks', 'desserts']);
+            $table->string('description');
+            $table->boolean('is_available')->default(true);
             $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });

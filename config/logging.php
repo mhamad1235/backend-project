@@ -64,6 +64,10 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
+          'telescope' => [
+        'driver' => 'monolog',
+        'handler' => Laravel\Telescope\Watchers\WatchersLoggerHandler::class,
+    ],
 
         'daily' => [
             'driver' => 'daily',

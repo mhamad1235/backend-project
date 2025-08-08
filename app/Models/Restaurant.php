@@ -11,13 +11,14 @@ class Restaurant extends Model implements TranslatableContract
     use HasFactory,Translatable;
 
     public $translatedAttributes = ['name', 'description'];
-    protected $with = ['translations'];
+      protected $hidden = [ 'translations'];
 
     protected $fillable = [
         'latitude',
         'longitude',
         'address',
         'city_id',
+        'account_id', // Added to link to the account
     ];
 
     public function city()
@@ -48,7 +49,7 @@ class Restaurant extends Model implements TranslatableContract
 
      public function account()
      {
-      return $this->belongsTo(Account::class);
+      return $this->hasOne(Account::class);
       }
 
 }  

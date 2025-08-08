@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use DataTables;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
-
+use App\Models\Account;
 class RestaurantController extends Controller
 {
      public function index(Request $request)
@@ -89,7 +89,9 @@ class RestaurantController extends Controller
     public function create()
     {
         $cities = City::all();
-        return view('admin.restaurants.create', compact('cities'));
+        $account=Account::where('role_type', 'restaurant')->get();
+        
+        return view('admin.restaurants.create', compact('cities','account'));
     }
 
   public function store(Request $request)
@@ -106,6 +108,7 @@ class RestaurantController extends Controller
         'longitude' => 'nullable|numeric|between:-180,180',
         'address' => 'required',
         'city_id' => 'required|exists:cities,id',
+        'account_id' => 'required|exists:accounts,id', // Ensure account exists
     ]);
 
     // Create restaurant first to get ID
@@ -114,6 +117,7 @@ class RestaurantController extends Controller
         'latitude' => $request->latitude,
         'longitude' => $request->longitude,
         'city_id' => $request->city_id,
+        'account_id' => $request->account_id, // Store the account ID
     ]);
       foreach ($request->name as $locale => $name) {
         $restaurant->translateOrNew($locale)->name = $name;

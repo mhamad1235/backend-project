@@ -164,6 +164,17 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="city_id" class="form-label">Account *</label>
+                            <select name="account_id" id="account_id" class="form-select" required>
+                                <option value="">-- Choose Account --</option>
+                                @foreach ($account as $ac)
+                                    <option value="{{ $ac->id }}">
+                                        {{ $ac->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label">Phone</label>

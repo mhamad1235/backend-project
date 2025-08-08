@@ -78,11 +78,15 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     
     public function journeys()
-    {
-        
-    return $this->belongsToMany(Journey::class, 'journey_user')
-                ->withTimestamps()
-                ->withPivot('paid');
-    }
+{
+    return $this->belongsToMany(Journey::class)
+                ->withPivot('paid') // allow access to the 'paid' column
+                ->withTimestamps();
+}
+       public function journeyUsers()
+       {
+        return $this->hasMany(JourneyUser::class);
+       }
+ 
 
 }
