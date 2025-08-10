@@ -15,7 +15,7 @@ use Astrotomic\Translatable\Translatable;
 
         protected $guarded = [];
         public $translatedAttributes = ['name'];
-        protected $with = ["translations"];
+        protected $hidden = ["translations"];
         protected $cascadeDeletes = ['translations'];
 
         protected $casts = [

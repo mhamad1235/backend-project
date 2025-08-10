@@ -47,9 +47,14 @@ class Restaurant extends Model implements TranslatableContract
       return $avg ? number_format($avg, 1) : 0;
      }
 
-     public function account()
-     {
+      public function account()
+      {
       return $this->hasOne(Account::class);
+      }
+
+      public function favorites()
+      {
+       return $this->morphMany(Favorite::class, 'favoritable');
       }
 
 }  

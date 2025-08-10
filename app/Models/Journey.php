@@ -38,6 +38,12 @@ class Journey extends Model implements TranslatableContract
      {
       return $this->hasMany(JourneyUser::class);
      }
+  
+     public function favorites()
+     {
+      return $this->morphMany(Favorite::class, 'favoritable');
+     }
+
 
 
 }

@@ -16,7 +16,7 @@ class Hotel extends Model implements TranslatableContract
         'city_id',
     ];
      public $translatedAttributes = ['name', 'description'];
-    protected $with = ['translations'];
+     protected $hidden = [ 'translations'];
       public function images()
     {
         return $this->morphMany(Image::class, 'imageable');
@@ -37,4 +37,10 @@ class Hotel extends Model implements TranslatableContract
       $avg = $this->feedbacks()->avg('rating');
       return $avg ? number_format($avg, 1) : 0;
     }
+  
+     public function favorites()
+      {
+      return $this->morphMany(Favorite::class, 'favoritable');
+      }
+
 }

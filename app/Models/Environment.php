@@ -12,7 +12,7 @@ class Environment extends Model implements TranslatableContract
     use HasFactory, Translatable;
 
     public $translatedAttributes = ['name','description'];
-    protected $with = ['translations'];
+   protected $hidden = [ 'translations'];
 
 
      protected $fillable = ['phone', 'latitude', 'longitude','city_id','type'];
@@ -56,5 +56,11 @@ class Environment extends Model implements TranslatableContract
       $avg = $this->feedbacks()->avg('rating');
       return $avg ? number_format($avg, 1) : 0;
     }
+   
+     public function favorites()
+     {
+      return $this->morphMany(Favorite::class, 'favoritable');
+     }
+
   
 }

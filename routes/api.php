@@ -22,14 +22,14 @@ use App\Events\NewNotificationEvent;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\JourneyController;
 use App\Http\Controllers\Api\RestaurantController;
-
+use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\HomeController;
 
 Route::group(["prefix" => "auth"], function () {
     // Route::get('/{provider}', [SocialAuthController::class, 'redirectToProvider']);
     // Route::get('/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback']);
     // Route::post('/send', [TwilioController::class, 'sendOtp']);
     // Route::post('/verify', [TwilioController::class, 'verify']);
-
 
     Route::post('/register',[AuthController::class,'register']);
     Route::post('/login',[AuthController::class,'login'])->name('login');
@@ -42,15 +42,22 @@ Route::group(["prefix" => "auth"], function () {
 
 });
 
+Route::group(["prefix" => "guest"], function () {
+Route::get('/restaurants', [HomeController::class, 'getRestaurants']);
+Route::get('/restaurants/{id}', [HomeController::class, 'getRestaurant']);
+});
+
+// Route::post('/email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail'])
+//     ->name('verification.send');
+
+// Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verifyEmail'])
+//     ->name('verification.verify');
+
 Route::controller(DataResourceController::class)->group(function () {
     Route::get('cities',  'cities');
 });
 
-Route::post('/email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail'])
-    ->name('verification.send');
 
-Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verifyEmail'])
-    ->name('verification.verify');
 
  Route::prefix('account')->group(function () {
     Route::post('/login', [AccountAuthController::class, 'login']);
@@ -63,34 +70,29 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 });
 
     Route::group(['middleware' => 'auth:sanctum'], function () {
-        Route::get('/places', [OtpController::class, 'index']);
-
-        Route::post('refresh-token', [OtpController::class, 'refreshToken'])->name('refresh');
+         Route::get('/places', [OtpController::class, 'index']);
+         Route::post('refresh-token', [OtpController::class, 'refreshToken'])->name('refresh');
          Route::get('/buses', [BookingController::class, 'getBuses']);
          Route::post('/bookings/buses/{bus}', [BookingController::class, 'createBooking']);
          Route::get('/bookings', [BookingController::class, 'getUserBookings']);
          Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelBooking']);
             
-
-
-
          Route::post('fib/first', [BookingController::class, 'first']);
          Route::post('join/journey/{id}', [BookingController::class, 'second']);
          Route::post('fib/third/{paymentId}', [BookingController::class, 'third']);
        
          Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund']);
          Route::post('fib/payment-complete', [BookingController::class, 'callback']);
+
+         Route::post('/favorites/{type}/{id}', [FavoriteController::class, 'toggle']);
+         Route::get('/favorites', [FavoriteController::class, 'index']);
+
     });
+    
 
 
 
-    Route::middleware(['auth:account', 'role:motel'])->group(function () {
-    Route::get('/motel/dashboard', function () {
-        return response()->json([
-            'message' => 'Welcome to the Motel dashboard!',
-        ]);
-    });
-});
+
 
 
 
