@@ -78,7 +78,9 @@ public function index(Request $request, Restaurant $restaurant)
         'name' => 'required|string',
         'price' => 'required|numeric',
         'category' => 'required|string',
-      'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+       'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+       'description' => 'nullable|string',
+       'is_available' => 'required|boolean',
     ]);
     
     $food = $restaurant->foods()->create($data);

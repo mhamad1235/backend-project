@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\App;
 use App\Models\Food;
 class RestaurantController extends Controller
 {
-   public function store(Request $request)
+public function store(Request $request)
 {
     $account = auth('account')->user();
 
@@ -20,7 +20,7 @@ class RestaurantController extends Controller
         return response()->json(['message' => 'Restaurant already exists for this account.'], 400);
     }
 
-    // Validate the input
+    // Validate input
     $validated = $request->validate([
         'latitude' => 'required|numeric',
         'longitude' => 'required|numeric',
@@ -30,6 +30,8 @@ class RestaurantController extends Controller
         'description' => 'required|string',
         'locale' => 'required|string|size:2',
         'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        'property_ids' => 'nullable|array',
+        'property_ids.*' => 'exists:properties,id',
     ]);
 
     DB::beginTransaction();
@@ -43,41 +45,44 @@ class RestaurantController extends Controller
             'city_id' => $validated['city_id'],
         ]);
 
+        // Translations
         $requiredLocales = ['ar', 'en', 'ku'];
-        for ($i=0; $i < count($requiredLocales); $i++) { 
-        $restaurant->translateOrNew($requiredLocales[$i])->name = $validated['name'];
-        $restaurant->translateOrNew($requiredLocales[$i])->description = $validated['description'] ?? null;
-        $restaurant->save();
+        foreach ($requiredLocales as $locale) {
+            $restaurant->translateOrNew($locale)->name = $validated['name'];
+            $restaurant->translateOrNew($locale)->description = $validated['description'] ?? null;
         }
-  
+        $restaurant->save();
 
-        // Upload images if any
-        if ($request->hasFile('images')) {
-            $images = $request->file('images');
-            $images = is_array($images) ? $images : [$images];
+        // Upload images
+         if ($request->hasFile('images')) {
+             $images = is_array($request->file('images')) ? $request->file('images') : [$request->file('images')];
+           foreach ($images as $image) {
+            $path = $image->store('uploads', 's3');
+            $restaurant->images()->create(['path' => $path]);
+        }
+    }
 
-            foreach ($images as $image) {
-                $path = $image->store('upload', 'public');
-                $restaurant->images()->create(['path' => $path]);
-            }
+        // Attach properties
+        if (!empty($validated['property_ids'])) {
+            $restaurant->properties()->sync($validated['property_ids']);
         }
 
         DB::commit();
 
         return response()->json([
             'message' => 'Restaurant created successfully.',
-            'data' => $restaurant->load('translations', 'images'),
+            'data' => $restaurant->load('translations', 'images', 'properties'),
         ], 201);
 
     } catch (\Exception $e) {
         DB::rollBack();
-
         return response()->json([
             'message' => 'Failed to create restaurant.',
             'error' => $e->getMessage(),
         ], 500);
     }
 }
+
 
 
     public function show($id)
@@ -120,7 +125,7 @@ class RestaurantController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',
-            'category' => 'nullable|string|max:255',
+            'category_id' => 'required|exists:food_categories,id',
             'images.*' => 'nullable|image|max:2048',
             'description' => 'required|string|max:1000',
             'is_available' => 'required|boolean',
@@ -130,7 +135,7 @@ class RestaurantController extends Controller
         $food = $restaurant->foods()->create([
             'name' => $validated['name'],
             'price' => $validated['price'],
-            'category' => $validated['category'] ?? null,
+            'category_id' => $validated['category_id'] ?? null,
             'description' => $validated['description'],
             'is_available' => $validated['is_available'],
         ]);

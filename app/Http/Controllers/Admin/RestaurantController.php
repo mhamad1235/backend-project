@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Restaurant;
 use App\Models\City;
 use App\Models\Food;
+use App\Models\Property;
 use Illuminate\Http\Request;
 use DataTables;
 use App\Http\Controllers\Controller;
@@ -89,9 +90,10 @@ class RestaurantController extends Controller
     public function create()
     {
         $cities = City::all();
+        $property = Property::all();
         $account=Account::where('role_type', 'restaurant')->get();
         
-        return view('admin.restaurants.create', compact('cities','account'));
+        return view('admin.restaurants.create', compact('cities','account','property'));
     }
 
   public function store(Request $request)
@@ -108,7 +110,9 @@ class RestaurantController extends Controller
         'longitude' => 'nullable|numeric|between:-180,180',
         'address' => 'required',
         'city_id' => 'required|exists:cities,id',
-        'account_id' => 'required|exists:accounts,id', // Ensure account exists
+        'account_id' => 'required|exists:accounts,id',
+        'property_ids' => 'nullable|array',
+        'property_ids.*' => 'exists:properties,id',
     ]);
 
     // Create restaurant first to get ID
@@ -134,6 +138,9 @@ class RestaurantController extends Controller
             ]);
         }
     }
+      if (!empty($request['property_ids'])) {
+            $restaurant->properties()->sync($request['property_ids']);
+        }
 
     return redirect()->route('restaurants.index')->with('success', 'Restaurant created successfully.');
 }

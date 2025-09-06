@@ -21,6 +21,14 @@
                         <label for="name" class="form-label">Food Name</label>
                         <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
                     </div>
+                     <div class="mb-3">
+                        <label for="name" class="form-label">description Name</label>
+                        <input type="text" name="description" id="description" class="form-control" value="{{ old('description') }}" required>
+                    </div>
+                     <div class="mb-3">
+                        <label for="name" class="form-label">description Name</label>
+                        <input type="text" name="is_available" id="is_available" class="form-control" value="{{ old('is_available') }}" required>
+                    </div>
 
                     <div class="mb-3">
                         <label for="price" class="form-label">Price</label>

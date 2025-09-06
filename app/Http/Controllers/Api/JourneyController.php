@@ -24,43 +24,57 @@ public function show($id)
     return response()->json($journey);
 }
 
-    public function store(Request $request)
-    {
-        $account = auth('account')->user();
+ public function store(Request $request)
+{
+    $account = auth('account')->user();
 
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'destination' => 'required|string',
-            'duration' => 'required|integer',
-            'price' => 'required|integer',
-            'locale' => 'required|string|size:2',
-            'images.*' => 'nullable|image|max:2048',
-        ]);
+    $validated = $request->validate([
+        'name' => 'required|string',
+        'description' => 'required|string',
+        'destination' => 'required|string',
+        'duration' => 'required|integer',
+        'price' => 'required|integer',
+        'locale' => 'required|string|size:2',
+        'images.*' => 'nullable|image|max:2048',
+        'locations' => 'required|array|min:1',
+        'locations.*.latitude' => 'required|numeric|between:-90,90',
+        'locations.*.longitude' => 'required|numeric|between:-180,180',
+    ]);
 
-        $journey = $account->journeys()->create([
-            'destination' => $validated['destination'],
-            'duration' => $validated['duration'],
-            'price' => $validated['price'],
-        ]);
+    $journey = $account->journeys()->create([
+        'destination' => $validated['destination'],
+        'duration' => $validated['duration'],
+        'price' => $validated['price'],
+    ]);
 
-        $journey->translateOrNew($validated['locale'])->name = $validated['name'];
-        $journey->translateOrNew($validated['locale'])->description = $validated['description'];
-        $journey->save();
+    // Translations
+    $journey->translateOrNew($validated['locale'])->name = $validated['name'];
+    $journey->translateOrNew($validated['locale'])->description = $validated['description'];
+    $journey->save();
 
-       if ($request->hasFile('images')) {
-        $images = $request->file('images');
-         $images = is_array($images) ? $images : [$images];
-
-         foreach ($images as $image) {
-         $path = $image->store('uploads', 's3');
-         $journey->images()->create(['path' => $path]);
+    // Save images
+    if ($request->hasFile('images')) {
+        $images = is_array($request->file('images')) ? $request->file('images') : [$request->file('images')];
+        foreach ($images as $image) {
+            $path = $image->store('uploads', 's3');
+            $journey->images()->create(['path' => $path]);
+        }
     }
+
+    // Save multiple coordinates
+    foreach ($validated['locations'] as $location) {
+        $journey->locations()->create([
+            'latitude' => $location['latitude'],
+            'longitude' => $location['longitude'],
+        ]);
+    }
+
+    return response()->json([
+        'message' => 'Journey created successfully',
+        'data' => $journey->load('images', 'locations'),
+    ], 201);
 }
 
-
-        return response()->json(['message' => 'Journey created', 'data' => $journey], 201);
-    }
 
 public function update(Request $request, $id)
 {   

@@ -223,6 +223,17 @@
                             </select>
                         </div>
                     </div>
+
+                     <div class="col-md-6 mb-3">
+                            <label class="form-label">Account *</label>
+                            <select class="form-select" name="account_id" required>
+                                <option value="">Select Account</option>
+                                @foreach($account as $acc)
+                                    <option value="{{ $acc->id }}">{{ $acc->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                     
                     <!-- Map Section -->
                     <div class="mb-4">

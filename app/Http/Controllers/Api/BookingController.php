@@ -20,7 +20,12 @@ use App\Models\Journey;
 use FirstIraqiBank\FIBPaymentSDK\Services\FIBPaymentIntegrationService;
 use App\Enums\RoleType;
 use App\Services\FIBPaymentService;
-
+use Illuminate\Support\Facades\Http;
+use App\Models\HotelRoomUnit;
+use App\Models\RoomAvailability;
+use App\Models\HotelRoom;
+use App\Models\HotelPayment; 
+use Illuminate\Support\Facades\DB;
 class BookingController extends Controller
 {
 
@@ -49,7 +54,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function createBooking(Request $request, Bus $bus)
+public function createBooking(Request $request, Bus $bus)
     {
         $validated = $request->validate([
      
@@ -79,7 +84,7 @@ class BookingController extends Controller
     public function getUserBookings(Request $request)
     {
         $bookings = Auth::user()->bookings()
-            ->with('bus')
+            ->with(['hotel.city','room.type','unit'])
             ->latest()
             ->paginate(10);
 
@@ -115,11 +120,7 @@ class BookingController extends Controller
 
 
     public function calculatePrice(Request $request)
-{
-
-       
-    
-   $request->validate([
+{$request->validate([
         'bookable_type' => 'required|string',
         'bookable_id' => 'required|integer',
         'start_time' => 'required|date_format:Y-m-d h:i A',
@@ -263,6 +264,8 @@ public function store(Request $request)
 
 //  return response()->json(['access_token' => $accessToken]);
 //   }
+
+
 public function second(Request $request,$id,FIBPaymentService $service)
 {
     
@@ -275,8 +278,8 @@ public function second(Request $request,$id,FIBPaymentService $service)
             'currency' => 'IQD',
         ],
         'description' => 'Journey Payment',
-        'statusCallbackUrl' => "https://176627c2ea98.ngrok-free.app/api/callback",
-        'redirectUri' => 'https://176627c2ea98.ngrok-free.app/api/fib/payment-complete',
+        'statusCallbackUrl' => "http://127.0.0.1:8000/api/callback",
+        'redirectUri' => 'http://127.0.0.1:8000/api/fib/payment-complete',
         'expiresIn' => 'PT2H',
         'refundableFor' => 'PT48H',
         'category' => 'ECOMMERCE',
@@ -337,7 +340,7 @@ public function refund($paymentId)
             'client_secret' => '2d9d9e4b-8b29-4d74-a393-9b9684975512',
         ],
     ]);
-
+    
     $accessToken = json_decode($tokenResponse->getBody(), true)['access_token'];
 
     // Step 2: Send refund request
@@ -412,4 +415,332 @@ public function payment(Request $request){
            ], 404);
         }
     }
+    public function payout(Request $request,FIBPaymentService $service){
+    return $service->getAccessToken();
+    }
+    
+
+    public function authorizePayout(string $payoutId, FIBPaymentService $service)
+{
+    // Your bearer token from FIB authentication
+    $token = $service->getAccessToken();
+
+    $url = "https://fib.stage.fib.iq/protected/v1/payouts/{$payoutId}/authorize";
+
+    $response = Http::withToken($token)->post($url);
+
+    if ($response->successful()) {
+        return [
+            'success' => true,
+            'message' => 'Payout authorized successfully'
+        ];
+    }
+
+    return [
+        'success' => false,
+        'status'  => $response->status(),
+        'error'   => $response->body()
+    ];
+}
+public function rejectJourney(string $paymentId, FIBPaymentService $service, $journeyId)
+{
+    $paymentData = $service->getPayment($paymentId);
+
+    if (($paymentData['status'] ?? '') !== 'PAID') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Payment is not completed yet',
+            'status'  => $paymentData['status'] ?? 'UNKNOWN'
+        ], 400);
+    }
+
+    $iban = $paymentData['paidBy']['iban'] ?? null;
+    if (!$iban) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No IBAN found in payment data'
+        ], 400);
+    }
+
+    $payoutResult = $service->createPayout(
+        5000,
+        'IQD',
+        $iban,
+        'Auto payout after payment'
+    );
+
+    if (!isset($payoutResult['payoutId'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create payout',
+            'data'    => $payoutResult
+        ], 400);
+    }
+
+    $authorizeData = $service->authorizePayout($payoutResult['payoutId']);
+    if (!$authorizeData['success']) {
+        return response()->json([
+            'success'   => false,
+            'message'   => 'Payout authorization failed',
+            'payment'   => $paymentData,
+            'payout'    => $payoutResult,
+            'authorize' => $authorizeData
+        ], 400);
+    }
+
+    $record = JourneyUser::where('journey_id', $journeyId)
+        ->where('user_id', Auth::id())
+        ->first();
+
+    if ($record) {
+        $record->delete();
+    }
+
+    return response()->json([
+        'success'   => true,
+        'message'   => 'Journey user removed successfully',
+        'payment'   => $paymentData,
+        'payout'    => $payoutResult,
+        'authorize' => $authorizeData
+    ]);
+}
+
+
+
+
+
+
+public static function checkAvailability($hotel_id, $room_id, Request $request)
+{
+    $validated = $request->validate([
+        'check_in'   => 'required|date|after_or_equal:today',
+        'check_out'  => 'required|date|after:check_in',
+        'guests'     => 'required|integer|min:1',
+        'rooms'      => 'required|integer|min:1',
+    ]);
+
+    $checkIn  = $validated['check_in'];
+    $checkOut = $validated['check_out'];
+    $roomsRequested = $validated['rooms'];
+
+    $numberOfNights = Carbon::parse($checkIn)->diffInDays(Carbon::parse($checkOut));
+
+    $hotelRoom = HotelRoom::findOrFail($room_id);
+    $pricePerNight = $hotelRoom->price;
+
+    // ✅ Get available units
+    $availableUnits = HotelRoomUnit::where('hotel_room_id', $room_id)
+        ->whereDoesntHave('availabilities', function ($query) use ($checkIn, $checkOut) {
+            $query->whereBetween('date', [
+                $checkIn,
+                date('Y-m-d', strtotime($checkOut . ' -1 day'))
+            ]);
+        })
+        ->take($roomsRequested)
+        ->pluck('id'); // just return IDs
+
+    if ($availableUnits->count() >= $roomsRequested) {
+        $totalPrice = $pricePerNight * $roomsRequested * $numberOfNights;
+
+        return [
+            'success'       => true,
+            'message'       => 'Rooms available',
+            'total_price'   => $totalPrice,
+            'unit_ids'      => $availableUnits, // ✅ return available unit IDs
+        ];
+    }
+
+    // if not available
+    $unitIds = HotelRoomUnit::where('hotel_room_id', $room_id)->pluck('id');
+
+    $unavailableDates = RoomAvailability::whereIn('hotel_room_unit_id', $unitIds)
+        ->whereBetween('date', [
+            $checkIn,
+            date('Y-m-d', strtotime($checkOut . ' -1 day'))
+        ])
+        ->where('available', false)
+        ->pluck('date')
+        ->unique()
+        ->values();
+
+    return [
+        'success'            => false,
+        'message'            => 'Some dates are not available',
+        'unavailable_dates'  => $unavailableDates
+    ];
+}
+
+
+ 
+
+public function bookHotelPayment(Request $request, FIBPaymentService $service)
+{
+    $result = self::checkAvailability(
+        $request->hotel_id,
+        $request->room_id,
+        $request
+    );
+
+
+    if ($result['success'] === false) {
+        return response()->json($result, 400);
+    }
+
+      $paymentPayload = [
+        'monetaryValue' => [
+            'amount' => $result['total_price'],
+            'currency' => 'IQD',
+        ],
+        'description' => 'Booking Payment',
+        'statusCallbackUrl' => "https://77f7a44e6d74.ngrok-free.app/api/callback/hotel",
+        'expiresIn' => 'PT2H',
+        'refundableFor' => 'PT48H',
+        'category' => 'ECOMMERCE',
+    ];
+
+   
+    $response = $service->createPayment($paymentPayload);
+   HotelPayment::create([
+    'user_id'   => auth()->id(),
+    'hotel_id'  => $request->hotel_id,
+    'room_id'   => $request->room_id,
+    'unit_ids'   => $result['unit_ids'],
+    'check_in'  => $request->check_in,
+    'check_out' => $request->check_out,
+    'fib_payment_id'=>$response['paymentId'],
+    'price'     => $result['total_price'],
+]);
+    return response()->json($response);
+}
+
+
+public function bookHotel($hotel_id, $room_id, Request $request,FIBPaymentService $service)
+{
+   $validated = $request->validate([
+    'check_in'   => 'required|date|after_or_equal:today',
+    'check_out'  => 'required|date|after:check_in',
+    'guests'     => 'required|integer|min:1',
+    'rooms'      => 'required|integer|min:1', 
+]);
+$checkIn  = $validated['check_in'];
+$checkOut = $validated['check_out'];
+$roomsRequested = $validated['rooms'];
+
+
+$numberOfNights = Carbon::parse($checkIn)->diffInDays(Carbon::parse($checkOut));
+
+
+$hotelRoom = HotelRoom::findOrFail($room_id);
+$pricePerNight = $hotelRoom->price;
+
+
+$availableUnits = HotelRoomUnit::where('hotel_room_id', $room_id)
+    ->whereDoesntHave('availabilities', function ($query) use ($checkIn, $checkOut) {
+        $query->whereBetween('date', [$checkIn, date('Y-m-d', strtotime($checkOut . ' -1 day'))]);
+    })
+    ->take($roomsRequested)
+    ->get();
+ 
+    if ($availableUnits->count() >= $roomsRequested) {
+     $totalPrice = $pricePerNight * $roomsRequested * $numberOfNights;
+return response()->json([
+    "success"       =>  true,
+    'message'            => 'rooms available',
+    'requested_rooms'    => $roomsRequested,
+    'available_rooms'    => $availableUnits->count(),
+    'price'              =>$totalPrice.''.'IQD'
+], 200);
+   
+}
+
+
+$unitIds = HotelRoomUnit::where('hotel_room_id', $room_id)->pluck('id');
+
+$unavailableDates = RoomAvailability::whereIn('hotel_room_unit_id', $unitIds)
+    ->whereBetween('date', [$checkIn, date('Y-m-d', strtotime($checkOut . ' -1 day'))])
+    ->where('available', false)
+    ->pluck('date')
+    ->unique()
+    ->values();
+
+return response()->json([
+    "success"       =>  false,
+    'message'            => 'Not enough rooms available',
+    'requested_rooms'    => $roomsRequested,
+    'available_rooms'    => $availableUnits->count(),
+    'unavailable_dates'  => $unavailableDates,
+], 422);      
+}
+
+public function callbackHotel(Request $request)
+{
+    $payload = $request->all();
+
+    $paymentId = $payload['id'] ?? null;
+    $status = $payload['status'] ?? null;
+
+    if (!$paymentId || !$status) {
+        return response()->json(['error' => 'Invalid callback payload'], 400);
+    }
+
+    DB::beginTransaction();
+
+    try {
+        $payment = HotelPayment::where('fib_payment_id', $paymentId)->lockForUpdate()->first();
+
+        if (!$payment) {
+            DB::rollBack();
+            return response()->json(['error' => 'Payment not found.'], 404);
+        }
+        $payment->update([
+            'status' => "success",
+        ]);
+
+        $start = Carbon::parse($payment->check_in);
+        $end   = Carbon::parse($payment->check_out)->subDay();
+
+        $dates = [];
+        foreach ($payment->unit_ids as $unitId) {
+            for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+                $dates[] = [
+                    'hotel_room_unit_id' => $unitId,
+                    'date' => $date->format('Y-m-d'),
+                    'available' => true,
+                ];
+            }
+        }
+        RoomAvailability::insert($dates);
+        foreach ($payment->unit_ids as $unitId) {
+            Booking::create([
+                'user_id'        => $payment->user_id,
+                'hotel_id'       => $payment->hotel_id,
+                'room_id'        => $payment->room_id,
+                'unit_id'        => $unitId,
+                'amount'         => $payment->price,
+                'status'         => 'confirmed',
+                'payment_status' => $status,
+                'payment_method' => 'FIB',
+                'transaction_id' => $paymentId,
+                'booking_date'   => now(),
+                'start_time'     => $payment->check_in,
+                'end_time'       => $payment->check_out,
+                'notes'          => 'Hotel booking via FIB',
+            ]);
+        }
+
+        DB::commit();
+
+        return response()->json(['message' => 'Callback processed successfully.'], 200);
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+
+        return response()->json([
+            'error' => 'Failed to process callback.',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
 }

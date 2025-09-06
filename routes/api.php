@@ -22,8 +22,10 @@ use App\Events\NewNotificationEvent;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\JourneyController;
 use App\Http\Controllers\Api\RestaurantController;
+use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\HomeController;
+use App\Http\Controllers\Api\HotelBookingController; 
 
 Route::group(["prefix" => "auth"], function () {
     // Route::get('/{provider}', [SocialAuthController::class, 'redirectToProvider']);
@@ -42,21 +44,38 @@ Route::group(["prefix" => "auth"], function () {
 
 });
 
+
+
 Route::group(["prefix" => "guest"], function () {
-Route::get('/restaurants', [HomeController::class, 'getRestaurants']);
-Route::get('/restaurants/{id}', [HomeController::class, 'getRestaurant']);
+Route::get('/restaurants'         ,    [HomeController::class, 'getRestaurants' ]);
+Route::get('/restaurants/{id}'    ,    [HomeController::class, 'getRestaurant'  ]);
+Route::get('/environments/{type}' ,    [HomeController::class, 'getEnvironments']);
+Route::get('/environment/{id}'    ,    [HomeController::class, 'getEnvironment' ]);
+Route::get('/journey'             ,    [HomeController::class, 'getJourney'     ]);
+Route::get('/journey/{id}'        ,    [HomeController::class, 'getJourneyById'  ]);
+Route::get('/hotels'              ,    [HomeController::class, 'getHotels'      ]);
+Route::get('/hotel/{id}'          ,    [HomeController::class, 'getHotelById'   ]);
+
 });
+
+Route::controller(DataResourceController::class)->group(function () {
+    Route::get('cities',  'cities');
+});
+Route::controller(DataResourceController::class)->group(function () {
+    Route::get('properties',  'properties');
+});
+Route::controller(DataResourceController::class)->group(function () {
+    Route::get('foodtypes',  'foodtypes');
+});
+
+
+
 
 // Route::post('/email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail'])
 //     ->name('verification.send');
 
 // Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verifyEmail'])
 //     ->name('verification.verify');
-
-Route::controller(DataResourceController::class)->group(function () {
-    Route::get('cities',  'cities');
-});
-
 
 
  Route::prefix('account')->group(function () {
@@ -76,19 +95,39 @@ Route::controller(DataResourceController::class)->group(function () {
          Route::post('/bookings/buses/{bus}', [BookingController::class, 'createBooking']);
          Route::get('/bookings', [BookingController::class, 'getUserBookings']);
          Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelBooking']);
-            
+                 
+         
+ 
+
          Route::post('fib/first', [BookingController::class, 'first']);
-         Route::post('join/journey/{id}', [BookingController::class, 'second']);
+        
          Route::post('fib/third/{paymentId}', [BookingController::class, 'third']);
-       
-         Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund']);
+
+         Route::post('join/journey/{id}', [BookingController::class, 'second']);
+         Route::post('reject/journey/{paymentId}/{journeyId}', [BookingController::class, 'rejectJourney']);
+        
          Route::post('fib/payment-complete', [BookingController::class, 'callback']);
 
          Route::post('/favorites/{type}/{id}', [FavoriteController::class, 'toggle']);
          Route::get('/favorites', [FavoriteController::class, 'index']);
 
+         Route::post('/book/hotel/{hotel_id}/{room_id}', [HotelBookingController::class, 'bookHotel']);
+         Route::post('/fib/hotel/{hotel_id}/{room_id}',  [HotelBookingController::class, 'bookHotelPayment']);
     });
-    
+    Route::get('token',function(){
+         $client = new \GuzzleHttp\Client();
+
+    // Step 1: Get access token
+    $tokenResponse = $client->post('https://fib.stage.fib.iq/auth/realms/fib-online-shop/protocol/openid-connect/token', [
+        'form_params' => [
+            'grant_type' => 'client_credentials',
+            'client_id' => 'mp-it',
+            'client_secret' => '2d9d9e4b-8b29-4d74-a393-9b9684975512',
+        ],
+    ]);
+
+     return $accessToken = json_decode($tokenResponse->getBody(), true)['access_token'];
+    });
 
 
 
@@ -117,9 +156,11 @@ Route::middleware(['auth:account', 'role:restaurant'])->group(function () {
     Route::post('/restaurants/food'     ,   [RestaurantController::class, 'storeFood']);
     Route::delete('/restaurant/food/{id}',  [RestaurantController::class, 'deleteFood']);
     Route::get('/restaurant/food/{id}' ,    [RestaurantController::class, 'showFood']);
-    Route::post('/restaurant/food/{id}',   [RestaurantController::class, 'updateFood']);
+    Route::post('/restaurant/food/{id}',    [RestaurantController::class, 'updateFood']);
     Route::get('restaurant/food'        ,   [RestaurantController::class, 'foods']);
 });
+
+
 
 
 
@@ -132,4 +173,27 @@ Route::middleware(['auth:account', 'role:tourist'])->group(function () {
     Route::delete('/journeys/{id}', [JourneyController::class, 'destroy']);
 });
 
-  Route::post('callback', [BookingController::class, 'callback']);
+
+/////////// Hotel Routes
+Route::middleware(['auth:account', 'role:hotel'])->group(function () {
+    Route::get('/hotel'      ,              [HotelController::class, 'getHotel']);
+    Route::post('/restaurants'          ,   [RestaurantController::class, 'store']);
+    Route::delete('/restaurants/{id}'   ,   [RestaurantController::class, 'destroy']);
+    Route::post('/restaurants/food'     ,   [RestaurantController::class, 'storeFood']);
+    Route::delete('/restaurant/food/{id}',  [RestaurantController::class, 'deleteFood']);
+    Route::get('/restaurant/food/{id}' ,    [RestaurantController::class, 'showFood']);
+    Route::post('/restaurant/food/{id}',    [RestaurantController::class, 'updateFood']);
+    Route::get('restaurant/food'        ,   [RestaurantController::class, 'foods']);
+});
+
+
+
+
+   Route::post('callback', [BookingController::class, 'callback']);
+   Route::post('callback/hotel', [HotelBookingController::class, 'callbackHotel']);
+   Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund']);
+   Route::post('fib/payout', [BookingController::class, 'payout']);
+   Route::post('/fib/payoutment', [BookingController::class, 'create']);
+   Route::post('/fib/authorize/{payoutId}', [BookingController::class, 'authorizePayout']);
+   Route::post('/fib/return/{paymentId}', [BookingController::class, 'processPaymentAndAutoPayout']);
+  

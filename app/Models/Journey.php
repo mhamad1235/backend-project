@@ -17,6 +17,7 @@ class Journey extends Model implements TranslatableContract
         'price',
         'destination',
     ];
+     protected $appends = ['is_favorite'];
   
     public function tourist()
     {
@@ -43,7 +44,23 @@ class Journey extends Model implements TranslatableContract
      {
       return $this->morphMany(Favorite::class, 'favoritable');
      }
+      
+       public function getIsFavoriteAttribute()
+       {
+       if (!auth()->check()) {
+        return false;
+       }
 
+      return $this->favorites()->where('user_id', auth()->id())->exists();
+     }
 
+         public function locations()
+    {
+        return $this->morphMany(Location::class, 'locatable');
+    }
+       public function feedbacks()
+    {
+    return $this->morphMany(Feedback::class, 'feedbackable');
+    }
 
 }

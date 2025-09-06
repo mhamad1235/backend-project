@@ -14,23 +14,30 @@ class Hotel extends Model implements TranslatableContract
         'latitude',
         'longitude',
         'city_id',
+        'account_id', 
     ];
      public $translatedAttributes = ['name', 'description'];
      protected $hidden = [ 'translations'];
-      public function images()
-    {
+      
+     public function images()
+     {
         return $this->morphMany(Image::class, 'imageable');
-    }
+     }
 
      public function city()
     { 
     return $this->belongsTo(City::class);
     }
     
-    public function feedbacks()
-    {
-    return $this->morphMany(Feedback::class, 'feedbackable');
-    }
+      public function account()
+     { 
+     return $this->belongsTo(Account::class);
+     }
+
+      public function feedbacks()
+     {
+      return $this->morphMany(Feedback::class, 'feedbackable');
+     }
     
      public function getAverageRatingAttribute()
      {
@@ -42,5 +49,16 @@ class Hotel extends Model implements TranslatableContract
       {
       return $this->morphMany(Favorite::class, 'favoritable');
       }
+
+      public function properties()
+       {
+        return $this->morphToMany(Property::class, 'propertyable');
+       }
+        public function rooms()
+    {
+        return $this->hasMany(HotelRoom::class);
+    }
+
+
 
 }

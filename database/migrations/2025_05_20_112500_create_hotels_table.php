@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('latitude', 10, 7); // Latitude coordinates
             $table->decimal('longitude', 10, 7); // Longitude coordinates
             $table->foreignId('city_id')->constrained()->onDelete('cascade'); // Foreign key to cities
+            $table->foreignId('account_id')->unique()->constrained()->onDelete('cascade');
             $table->timestamps(); // created_at and updated_at
       
         });

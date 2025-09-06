@@ -22,9 +22,9 @@ class Account extends Authenticatable
         'role_type' => RoleType::class,
         'status' => AccountStatus::class,
     ];
-    public function hotels()
+    public function hotel()
     {
-    return $this->hasMany(Hotel::class);
+    return $this->hasOne(Hotel::class);
     }
 
     public function journeys()

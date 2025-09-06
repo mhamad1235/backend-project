@@ -60,6 +60,8 @@ Route::prefix('restaurants/{restaurant}/foods')->group(function () {
 });
  
   Route::resource('hotels', HotelController::class);
+  Route::get('hotels/{hotel}/detail', [HotelController::class, 'detail'])->name('hotels.detail');
+  Route::get('hotels/{hotel}/{room}/unit', [HotelController::class, 'unit'])->name('hotels.unit');
     Route::get('/feedbacks', [FeedbackController::class, 'index'])->name('admin.feedbacks.index');
     Route::put('/feedbacks/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('admin.feedbacks.update-status');
         Route::delete('/feedbacks/{feedback}', [FeedbackController::class, 'destroy'])->name('admin.feedbacks.destroy');

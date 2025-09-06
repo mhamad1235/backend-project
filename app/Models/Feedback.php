@@ -9,6 +9,7 @@ class Feedback extends Model
 
 
     public $table="feedbacks";
+    protected $hidden = ['created_at', 'updated_at'];
      protected $fillable = [
         'rating',
         'comment',

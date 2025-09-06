@@ -175,6 +175,18 @@
                                 @endforeach
                             </select>
                         </div>
+                       <div class="col-md-6 mb-3">
+    <label for="property_ids" class="form-label">Properties *</label>
+    <select name="property_ids[]" id="property_ids" class="form-select" multiple required>
+        @foreach ($property as $p)
+            <option value="{{ $p->id }}">
+                {{ $p->name }}
+            </option>
+        @endforeach
+    </select>
+    <small class="text-muted">Hold Ctrl (Windows) or ⌘ Command (Mac) to select multiple</small>
+</div>
+
                         
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label">Phone</label>

@@ -11,7 +11,7 @@ class Restaurant extends Model implements TranslatableContract
     use HasFactory,Translatable;
 
     public $translatedAttributes = ['name', 'description'];
-      protected $hidden = [ 'translations'];
+      protected $hidden = [ 'translations',"created_at", "updated_at"];
 
     protected $fillable = [
         'latitude',
@@ -20,7 +20,8 @@ class Restaurant extends Model implements TranslatableContract
         'city_id',
         'account_id', // Added to link to the account
     ];
-
+    protected $appends = ['is_favorite'];
+    
     public function city()
     {
         return $this->belongsTo(City::class);
@@ -48,13 +49,28 @@ class Restaurant extends Model implements TranslatableContract
      }
 
       public function account()
-      {
-      return $this->hasOne(Account::class);
-      }
+     { 
+     return $this->belongsTo(Account::class);
+    }
+
 
       public function favorites()
       {
        return $this->morphMany(Favorite::class, 'favoritable');
       }
+
+       public function getIsFavoriteAttribute()
+       {
+       if (!auth()->check()) {
+        return false;
+       }
+
+      return $this->favorites()->where('user_id', auth()->id())->exists();
+     }
+
+        public function properties()
+       {
+        return $this->morphToMany(Property::class, 'propertyable');
+       }
 
 }  

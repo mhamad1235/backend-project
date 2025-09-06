@@ -67,6 +67,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Favorite::class);
     }
 
+    public function favoriteRestaurants()
+    {
+    return $this->morphedByMany(Restaurant::class, 'favoritable', 'favorites');
+    }
+
+
     public function ssos()
     {
         return $this->hasMany(Sso::class);

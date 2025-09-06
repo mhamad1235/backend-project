@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('foods', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->decimal('price', 8, 2);
-            $table->enum('category', ['popular', 'starters', 'mains', 'drinks', 'desserts']);
-            $table->string('description');
-            $table->boolean('is_available')->default(true);
-            $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
+        $table->string('name'); // you can keep for default / fallback or move to translations
+        $table->decimal('price', 8, 2);
+        $table->text('description')->nullable();
+        $table->boolean('is_available')->default(true);
+        $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
+       $table->foreignId('category_id')->constrained('food_categories')->onDelete('cascade');// new relation
+        $table->timestamps();
         });
     }
 

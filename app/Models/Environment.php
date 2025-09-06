@@ -19,14 +19,15 @@ class Environment extends Model implements TranslatableContract
      protected $casts = [
     'type' => RestaurantType::class,
     ];
+     protected $appends = ['is_favorite'];
 
      public static $hourlyPrices = [
-        4 => 100,   // price for 4 hours
-        8 => 180,   // price for 8 hours
-        12 => 250,  // price for 12 hours
+        4 => 100,   
+        8 => 180,   
+        12 => 250,  
     ];
 
-    public static $dailyPrice = 400; // price per full day (24h)
+    public static $dailyPrice = 400; 
     public function images()
     {
         return $this->morphMany(Image::class, 'imageable');
@@ -62,5 +63,18 @@ class Environment extends Model implements TranslatableContract
       return $this->morphMany(Favorite::class, 'favoritable');
      }
 
+    public function getIsFavoriteAttribute()
+    {
+       if (!auth()->check()) {
+        return false;
+       }
+
+      return $this->favorites()->where('user_id', auth()->id())->exists();
+    }
+     
+       public function properties()
+      {
+        return $this->morphToMany(Property::class, 'propertyable');
+      }
   
 }

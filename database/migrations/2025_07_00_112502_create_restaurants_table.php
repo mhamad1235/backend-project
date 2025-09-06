@@ -16,8 +16,15 @@ return new class extends Migration
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
             $table->text('address')->nullable();
-            $table->foreignId('account_id')->constrained()->onDelete('cascade');
+
+            // account_id should be unique, since one account can only have one restaurant
+            $table->foreignId('account_id')
+                  ->unique() // 🔹 ensure only one restaurant per account
+                  ->constrained()
+                  ->onDelete('cascade');
+
             $table->foreignId('city_id')->constrained()->onDelete('cascade');
+
             $table->timestamps();
         });
     }

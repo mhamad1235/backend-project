@@ -105,8 +105,8 @@
                                 @endif
                             </td>
                             <td>
-                                {{ $booking->start_time->format('M d, Y') }}<br>
-                                {{ $booking->start_time->format('h:i A') }} - {{ $booking->end_time->format('h:i A') }}
+                             
+                                {{ $booking->start_time }}- {{ $booking->end_time}}
                             </td>
                             <td>
                                 @if($booking->amount)

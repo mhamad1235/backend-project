@@ -9,6 +9,9 @@ class Booking extends Model
 {
     protected $fillable = [
         'user_id',
+        'hotel_id',
+        'room_id',
+        'unit_id',
         'amount',
         'status',
         'payment_status',
@@ -18,46 +21,27 @@ class Booking extends Model
         'start_time',
         'end_time',
         'notes',
-        'bookable_id',
-        'bookable_type'
     ];
 
-    protected $casts = [
-        'booking_date' => 'datetime',
-    
-    ];
-     public function bookable(): MorphTo
-    {
-        return $this->morphTo();
-    }
 
-    public function user(): BelongsTo
+   
+     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-     public function hotelDetail()
+
+    public function hotel(): BelongsTo
     {
-        return $this->hasOne(HotelBookingDetail::class);
+        return $this->belongsTo(Hotel::class);
     }
 
-    public function busDetail()
+    public function room(): BelongsTo
     {
-        return $this->hasOne(BusBookingDetail::class);
+        return $this->belongsTo(HotelRoom::class, 'room_id');
     }
 
-    public function environmentDetail()
+    public function unit(): BelongsTo
     {
-        return $this->hasOne(EnvironmentBookingDetail::class);
-    }
-
-    // Get type-specific details dynamically
-    public function getDetailAttribute()
-    {
-        return match($this->bookable_type) {
-            Hotel::class => $this->hotelDetail,
-            Bus::class => $this->busDetail,
-            Environment::class => $this->environmentDetail,
-            default => null
-        };
+        return $this->belongsTo(HotelRoomUnit::class, 'unit_id');
     }
 }

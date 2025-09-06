@@ -9,10 +9,14 @@ use App\Models\Image;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\DataTables;
 use App\Models\City;
+use App\Models\Account;
+use App\Models\room;
+use App\Models\HotelRoom;
 class HotelController extends Controller
 {
       public function index(Request $request)
     {
+        
         if ($request->ajax()) {
             $hotels = Hotel::query()->with('city','translation') // Eager load
             ->when($request->search['value'] ?? null, function ($query, $search) {
@@ -88,7 +92,26 @@ class HotelController extends Controller
         $cities = City::with(['translations' => function ($query) {
         $query->where('locale', 'en');
         }])->get();
-        return view('admin.hotels.create',compact('cities'));
+        $account=Account::where('role_type', 'hotel')->get();
+       
+        return view('admin.hotels.create',compact('cities','account'));
+    }
+
+      public function detail($id)
+    {
+        $hotel = Hotel::where('id',$id)->with('rooms')->first();
+        
+    
+        return view('admin.hotels.detail',compact('hotel'));
+    }
+    public function unit($hotel_id,$room_id){
+    $hotel = Hotel::findOrFail($hotel_id); // get hotel
+    $room = HotelRoom::with('units')
+        ->where('hotel_id', $hotel_id)
+        ->where('id', $room_id)
+        ->firstOrFail();
+
+    return view('admin.hotels.unit', compact('room','hotel'));
     }
 
    public function store(Request $request)
@@ -103,6 +126,7 @@ class HotelController extends Controller
         'longitude' => 'required|numeric',
         'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'city_id' => 'required|exists:cities,id',
+        'account_id' => 'required|exists:accounts,id', // Ensure account exists
     ]);
 
     // Store non-translatable fields
@@ -111,6 +135,7 @@ class HotelController extends Controller
         'latitude' => $request->latitude,
         'longitude' => $request->longitude,
         'city_id' => $request->city_id,
+        'account_id' => $request->account_id, // Link to the account
     ]);
 
     // Store translations
@@ -136,9 +161,9 @@ class HotelController extends Controller
 }
 
 
-    public function edit(Hotel $cabin)
+    public function edit(Hotel $hotel)
     {
-        return view('admin.hotel.edit', compact('hotel'));
+        return view('admin.hotels.edit', compact('hotel'));
     }
 
     public function update(Request $request, Hotel $hotel)
