@@ -23,8 +23,8 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('locale')->index(); // en, ar, ku, etc.
-            $table->string('name');            // e.g. "Single Room"
+            $table->string('locale')->index(); 
+            $table->string('name');           
 
             $table->unique(['room_type_id', 'locale']);
         });

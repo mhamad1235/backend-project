@@ -68,6 +68,10 @@ Route::controller(DataResourceController::class)->group(function () {
     Route::get('foodtypes',  'foodtypes');
 });
 
+Route::controller(DataResourceController::class)->group(function () {
+    Route::get('roomtypes',  'roomtypes');
+});
+
 
 
 
@@ -176,14 +180,13 @@ Route::middleware(['auth:account', 'role:tourist'])->group(function () {
 
 /////////// Hotel Routes
 Route::middleware(['auth:account', 'role:hotel'])->group(function () {
-    Route::get('/hotel'      ,              [HotelController::class, 'getHotel']);
-    Route::post('/restaurants'          ,   [RestaurantController::class, 'store']);
-    Route::delete('/restaurants/{id}'   ,   [RestaurantController::class, 'destroy']);
-    Route::post('/restaurants/food'     ,   [RestaurantController::class, 'storeFood']);
-    Route::delete('/restaurant/food/{id}',  [RestaurantController::class, 'deleteFood']);
-    Route::get('/restaurant/food/{id}' ,    [RestaurantController::class, 'showFood']);
-    Route::post('/restaurant/food/{id}',    [RestaurantController::class, 'updateFood']);
-    Route::get('restaurant/food'        ,   [RestaurantController::class, 'foods']);
+    Route::get('/hotel'                   ,        [HotelController::class, 'getHotel']);
+    Route::post('/hotel/create-type'      ,        [HotelController::class, 'createTypeRoom']);
+    Route::get('/hotel/room'              ,        [HotelController::class, 'getHotelRoom']);
+    Route::post('/hotel/create-room'      ,        [HotelController::class, 'createHotelRoom']);
+    Route::post('/hotel/room/create-unit' ,        [HotelController::class, 'createUnitRoom']);
+    Route::post('/hotel/unit/make-unavailable' ,   [HotelController::class, 'unitUnavailable']);
+    Route::get('/hotel/unit/get-unavailable/{id}' ,[HotelController::class, 'getUnitUnavailable']);
 });
 
 

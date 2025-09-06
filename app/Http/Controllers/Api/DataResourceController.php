@@ -17,6 +17,7 @@ use App\Enums\{
 use App\Http\Resources\CityCollection;
 use App\Models\City;
 use App\Models\Property;
+use App\Models\RoomType;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -51,6 +52,24 @@ class DataResourceController extends Controller
                 'message' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+    public function roomtypes(){
+       try {   
+       $roomTypes = RoomType::orderBy('created_at')
+        ->get()
+        ->map(function ($roomType) {
+        return [
+            'id' => $roomType->id,
+            'name' => $roomType->name, 
+        ];
+    });
+
+       return response()->json([
+        'data' => $roomTypes
+       ]);
+    } catch (\Throwable $th) {
+        return $th->getMessage();
+    }
     }
     public function foodtypes(Request $request)
     {
