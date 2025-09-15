@@ -171,7 +171,7 @@ Route::middleware(['auth:account', 'role:restaurant'])->group(function () {
 ///////// Journey Routes
 Route::middleware(['auth:account', 'role:tourist'])->group(function () {
     Route::get('/journeys', [JourneyController::class, 'index']);
-    Route::get('/journeys/{id}', [JourneyController::class, 'show']);
+    Route::get('/journeys/{id}', [JourneyController::class, 'listOfJoined']);
     Route::post('/journeys', [JourneyController::class, 'store']);
     Route::post('/journeys/{id}', [JourneyController::class, 'update']);
     Route::delete('/journeys/{id}', [JourneyController::class, 'destroy']);
@@ -193,7 +193,7 @@ Route::middleware(['auth:account', 'role:hotel'])->group(function () {
 
 
    Route::post('callback', [BookingController::class, 'callback']);
-   Route::post('callback/hotel', [HotelBookingController::class, 'callbackHotel']);
+   Route::post('callback/hotel', [HotelBookingController::class, 'callbackHotel'])->name('fib.hotel.callback');
    Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund']);
    Route::post('fib/payout', [BookingController::class, 'payout']);
    Route::post('/fib/payoutment', [BookingController::class, 'create']);

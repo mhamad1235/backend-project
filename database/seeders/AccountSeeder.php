@@ -15,23 +15,17 @@ class AccountSeeder extends Seeder
     {
         Account::create([
             'name' => 'Hotel Sunshine',
-            'phone' => '+96477596565',
-            'password' => Hash::make('password123'),
+            'phone' => '7754812814',
+            'password' => Hash::make('password12345'),
             'role_type' => 'hotel',
         ]);
-
-        Account::create([
-            'name' => 'Motel GreenStay',
-            'phone' => '+9642656548',
-            'password' => Hash::make('password123'),
-            'role_type' => 'motel',
+           Account::create([
+            'name' => 'Torist Sunshine',
+            'phone' => '7754812815',
+            'password' => Hash::make('password12345'),
+            'role_type' => 'tourist',
         ]);
 
-        Account::create([
-            'name' => 'Tourism Agency Alpha',
-            'phone' => '+96455689842',
-            'password' => Hash::make('password123'),
-            'role_type' => 'agency',
-        ]);
+     
     }
 }

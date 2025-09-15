@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('amount'); // store 10000 directly
             $table->enum('status', ['pending', 'success', 'failed'])->default('pending');
             $table->json('fib_response')->nullable(); // optional: full FIB response
+            $table->json('meta')->nullable();
             $table->timestamps();
         });
     }

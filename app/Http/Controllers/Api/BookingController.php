@@ -26,6 +26,9 @@ use App\Models\RoomAvailability;
 use App\Models\HotelRoom;
 use App\Models\HotelPayment; 
 use Illuminate\Support\Facades\DB;
+use App\Models\JourneyRegistrationGroup;
+use Illuminate\Validation\ValidationException;
+
 class BookingController extends Controller
 {
 
@@ -266,41 +269,89 @@ public function store(Request $request)
 //   }
 
 
-public function second(Request $request,$id,FIBPaymentService $service)
+public function second(Request $request, $id, FIBPaymentService $service)
 {
-    
-    $userId = auth::id(); 
-    $price=Journey::find($id)->price;
+    $journey = Journey::findOrFail($id);
+    $userId  = Auth::id();
+
+    $data = $request->validate([
+        'type'            => 'required|in:family,group',
+        'adults_count'    => 'required_if:type,family|nullable|integer|min:1|max:100',
+        'children_count'  => 'required_if:type,family|nullable|integer|min:0|max:100',
+        'people_count'    => 'required|integer|min:1|max:100',
+        'contact_user_id' => 'nullable|integer|exists:users,id',
+    ]);
+
+    $isFamily = $data['type'] === 'family';
+    if ($isFamily) {
+        $adults = (int)($data['adults_count'] ?? 1);
+        $children = (int)($data['children_count'] ?? 0);
+        $people_count=(int)($data['people_count'] ?? 0);
+        $totalPeople = $adults + $children+$people_count;
+    } else {
+        $totalPeople = (int)($data['people_count'] ?? 1);
+        $adults = 0;
+        $children = 0;
+    }
+    if ($totalPeople < 1) {
+        throw ValidationException::withMessages(['type' => ['Total headcount must be at least 1.']]);
+    }
+
+    $contactUserId = $data['contact_user_id'] ?? $userId;
+    $already = JourneyRegistrationGroup::where('journey_id', $journey->id)
+        ->where('contact_user_id', $contactUserId)->exists();
+    if ($already) {
+        throw ValidationException::withMessages(['contact_user_id' => ['You already registered for this journey.']]);
+    }
+
+    $amount = (int)$journey->price * $totalPeople;
+
+  
+
 
     $paymentPayload = [
-        'monetaryValue' => [
-            'amount' => $price,
-            'currency' => 'IQD',
-        ],
-        'description' => 'Journey Payment',
-        'statusCallbackUrl' => "http://127.0.0.1:8000/api/callback",
-        'redirectUri' => 'http://127.0.0.1:8000/api/fib/payment-complete',
-        'expiresIn' => 'PT2H',
-        'refundableFor' => 'PT48H',
-        'category' => 'ECOMMERCE',
+        'monetaryValue' => ['amount' => $amount, 'currency' => 'IQD'],
+        'description'       => 'Journey Payment',
+        'statusCallbackUrl' => 'https://60e82ee842bd.ngrok-free.app/api/callback',
+        'expiresIn'         => 'PT2H',
+        'refundableFor'     => 'PT48H',
+        'category'          => 'ECOMMERCE',
+     
     ];
 
-   
-    $response = $service->createPayment($paymentPayload);
-
+    $fib = $service->createPayment($paymentPayload);
 
     $payment = Payment::create([
-        'paymentable_id' => $id,
+        'paymentable_id'   => $journey->id,
         'paymentable_type' => Journey::class,
-        'user_id' => $userId,
-        'fib_payment_id' => $response['paymentId'],
-        'amount' => $paymentPayload['monetaryValue']['amount'],
-        'status' => 'pending',
-        'fib_response' => $response,
+        'user_id'          => $contactUserId,
+        'fib_payment_id'   => $fib['paymentId'] ?? null,
+        'amount'           => $amount,
+        'currency'         => 'IQD',
+        'status'           => 'pending',
+        'request_payload'  => $paymentPayload,
+        'fib_response'     => $fib,
+        'meta'             => [
+            'journey_id'     => $journey->id,
+            'type'           => $isFamily ? 'family' : 'group',
+            'adults_count'   => $adults,
+            'children_count' => $children,
+            'total_people'   => $totalPeople,
+            'contact_user_id'=> $contactUserId,
+        ],
     ]);
-    return response()->json($response);
-}
 
+    return response()->json([
+        'message'        => 'Payment created.',
+        'payment_id'     => $payment->id,
+        'fib_payment_id' => $payment->fib_payment_id,
+        'status'         => $payment->status,
+        'amount'         => $amount,
+        'currency'       => 'IQD',
+        'redirect'       => $fib['paymentUrl'] ?? null,
+         'fib_response'  =>$fib
+    ], 201);
+}
   public function third($paymentId)
 {
     $client = new \GuzzleHttp\Client();
@@ -359,41 +410,62 @@ public function refund($paymentId)
 
 public function callback(Request $request)
 {
+    // 1) Verify signature from FIB (HMAC, headers, etc.) – depends on provider docs
+    // abort_if(! $this->isValidSignature($request), 403);
+
     $payload = $request->all();
+    $paymentId = $payload['id']     ?? null;
+    $status    = $payload['status'] ?? null;// e.g., SUCCEEDED/FAILED
 
-    $paymentId = $payload['id'] ?? null;
-    $status = $payload['status'] ?? null;
-
-    if (!$paymentId || !$status) {
-        return response()->json(['error' => 'Invalid callback payload'], 400);
+    $payment = Payment::where('fib_payment_id', $paymentId)->lockForUpdate()->first();
+    if (! $payment) {
+        return response()->json(['message' => 'Payment not found'], 404);
     }
 
-    try {
-    $payment = Payment::where('fib_payment_id', $paymentId)->first();
-
-    if (!$payment) {
-        return response()->json(['error' => 'Payment not found.'], 404);
+    // Idempotency: if already processed, exit
+    if (in_array($payment->status, ['succeeded','failed','expired','refunded'])) {
+        return response()->json(['message' => 'Already processed'], 200);
     }
 
-   
+    // Update raw response
+    $payment->fib_response = array_merge((array)$payment->fib_response, ['callback' => $payload]);
+ 
+    if ($status === 'PAID') {
+        DB::transaction(function () use ($payment) {
+            $meta = $payment->meta ?? [];
+ 
+                JourneyRegistrationGroup::create([
+                    'journey_id'      => $meta['journey_id'],
+                    'contact_user_id' => $meta['contact_user_id'],
+                    'type'            => $meta['type'],
+                    'adults_count'    => $meta['adults_count'],
+                    'children_count'  => $meta['children_count'],
+                    'total_people'    => $meta['total_people'],
+                    'paid'            => true,
+                    'status'          => 'confirmed',
+                ]);
+            
 
-    JourneyUser::create([
-        'user_id'    => $payment->user_id,
-        'journey_id' => $payment->paymentable_id,
-        'paid'       => true,
-    ]);
+            $payment->status = 'success';
+            $payment->save();
+        });
 
-    return response()->json(['message' => 'Callback processed successfully.'], 200);
+        return response()->json(['message' => 'OK'], 200);
+    }
 
-} catch (\Throwable $e) {
-    return response()->json([
-        'error' => 'Failed to process callback.',
-        'details' => $e->getMessage()
-    ], 500);
+    $payment->status = match ($status) {
+        'failed'  => 'failed',
+        'expired' => 'expired',
+        default   => 'pending',
+    };
+    $payment->save();
+
+    return response()->json(['message' => 'OK'], 200);
 }
 
 
-}
+
+
 public function payment(Request $request){
     
 }

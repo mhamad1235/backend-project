@@ -71,7 +71,8 @@
                     </div>
                     
                     <div class="d-grid gap-2 mt-3">
-                        <button class="btn btn-booking">Book Now</button>
+                      
+                        <button class="btn btn-booking"><a href="{{route('hotels.unit',[$hotel->id,$room->id])}}">Check Now</a></button>
                     </div>
                 </div>
             </div>

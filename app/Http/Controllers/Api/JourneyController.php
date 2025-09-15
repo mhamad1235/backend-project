@@ -133,4 +133,49 @@ public function update(Request $request, $id)
 
         return response()->json(['message' => 'Journey deleted']);
     }
+
+  public function listOfJoined($id)
+{
+    $journey = Journey::with('registrationGroups.contactUser')->findOrFail($id);
+
+    $grouped = $journey->registrationGroups
+        ->map(function ($group) {
+            $data = [
+                'id' => $group->id,
+                'journey_id' => $group->journey_id,
+                'type' => $group->type,
+                'paid' => $group->paid==1 ? true : false,
+                'status' => $group->status,
+                'total_people' =>$group->total_people,
+                'contact_user' => $group->contactUser ? [
+                    'id' => $group->contactUser->id,
+                    'name' => $group->contactUser->name,
+                    'phone' => $group->contactUser->phone,
+                ] : null,
+            ];
+            if ($group->type === 'family') {
+                $data['adults_count'] = $group->adults_count;
+                $data['children_count'] = $group->children_count;
+            }
+
+            return $data;
+        })
+        ->groupBy('type'); 
+
+    $filtered = [
+        'id' => $journey->id,
+        'tourist_id' => $journey->tourist_id,
+        'destination' => $journey->destination,
+        'duration' => $journey->duration,
+        'price' => $journey->price,
+        'is_favorite' => $journey->is_favorite,
+        'name' => $journey->name,
+        'description' => $journey->description,
+        'registration_groups' => $grouped,
+    ];
+
+    return response()->json(['data' => $filtered]);
+}
+
+
 }

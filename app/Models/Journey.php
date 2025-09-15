@@ -62,5 +62,9 @@ class Journey extends Model implements TranslatableContract
     {
     return $this->morphMany(Feedback::class, 'feedbackable');
     }
+    public function registrationGroups() {
+        return $this->hasMany(JourneyRegistrationGroup::class);
+    }
+   
 
 }

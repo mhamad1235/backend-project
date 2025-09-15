@@ -15,10 +15,12 @@ class Payment extends Model
         'amount',
         'status',
         'fib_response',
+        'meta'
     ];
 
     protected $casts = [
         'fib_response' => 'array',
+          'meta' => 'array',
     ];
 
     public function paymentable(): MorphTo

@@ -15,7 +15,7 @@ return new class extends Migration
         $table->id();
         $table->foreignId('hotel_room_unit_id')->constrained('hotel_room_units')->cascadeOnDelete();
         $table->date('date'); 
-        $table->boolean('available')->default(true); 
+        $table->boolean('available')->default(false)->change();
         $table->timestamps();
         $table->unique(['hotel_room_unit_id', 'date']); 
     });

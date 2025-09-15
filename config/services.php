@@ -44,6 +44,7 @@ return [
     'client_id' => env('FIB_CLIENT_ID'),
     'client_secret' => env('FIB_CLIENT_SECRET'),
     'base_url' => env('FIB_BASE_URL', 'https://fib.stage.fib.iq'),
+    'callback_url' => 'https://c1a858ca31c0.ngrok-free.app/api/callback'
     
     ],
 
