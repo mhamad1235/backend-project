@@ -8,6 +8,7 @@ use App\Models\Hotel;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 class HomeController extends Controller
 {
      public function __construct()
@@ -275,4 +276,229 @@ public function getRestaurant($id)
 
     return $this->jsonResponse(true, "Get Hotels", 200, $hotels);
 }
+    public function getLocations(){
+         try {
+        $hotels =       Hotel::select('id', 'latitude', 'longitude')->get();
+        $restaurants =  Restaurant::select('id', 'latitude', 'longitude')->get();
+        $environments = Environment::select('id', 'latitude', 'longitude')->get();
+
+        return $this->jsonResponse(true, "Get Locations", 200, [
+            'hotels' => $hotels,
+            'restaurants' => $restaurants,
+            'environments' => $environments,
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'result' => false,
+            'status' => 500,
+            'message' => $e->getMessage(),
+        ]);
+    }
+    }
+
+   public function search(Request $request)
+{
+    try {
+        $searchTerm = $request->input('name');
+
+        if (!$searchTerm) {
+            return response()->json([
+                'result' => false,
+                'status' => 400,
+                'message' => 'Search term is required ❌'
+            ]);
+        }
+
+        $hotels = Hotel::whereTranslationLike('name', "%$searchTerm%")
+            ->select('id', 'latitude', 'longitude')
+            ->withTranslation()
+            ->get();
+
+        $restaurants = Restaurant::whereTranslationLike('name', "%$searchTerm%")
+            ->select('id', 'latitude', 'longitude')
+            ->withTranslation()
+            ->get();
+
+        $environments = Environment::whereTranslationLike('name', "%$searchTerm%")
+            ->select('id', 'latitude', 'longitude')
+            ->withTranslation()
+            ->get();
+            return $this->jsonResponse(true, "Get data", 200, [
+            'hotels' => $hotels,
+            'restaurants' => $restaurants,
+            'environments' => $environments,
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'result' => false,
+            'status' => 500,
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+
+    public function nearby(Request $request)
+{
+    try {
+  
+    $data = $request->validate([
+        'lat'       => 'required|numeric|between:-90,90',
+        'lng'       => 'required|numeric|between:-180,180',
+        'radius_km' => 'nullable|numeric|min:0', 
+    ]);
+
+    $lat    = (float) $data['lat'];
+    $lng    = (float) $data['lng'];
+    $radius = isset($data['radius_km']) ? (float) $data['radius_km'] : 10.0;
+
+
+    $haversine = "(6371 * acos(
+        cos(radians(?)) * cos(radians(latitude)) *
+        cos(radians(longitude) - radians(?)) +
+        sin(radians(?)) * sin(radians(latitude))
+    ))";
+    $bindings = [$lat, $lng, $lat];
+
+
+    $latDelta = $radius / 111.32; 
+    $cosLat   = max(cos(deg2rad($lat)), 1e-6); 
+    $lngDelta = $radius / (111.32 * $cosLat);
+
+    $restaurants = Restaurant::query()
+        ->select(['id', 'latitude', 'longitude'])
+        ->selectRaw("$haversine AS distance_km", $bindings)
+        ->addSelect(DB::raw("'restaurant' AS category"))
+        ->with('images')
+        ->whereBetween('latitude',  [$lat - $latDelta, $lat + $latDelta])
+        ->whereBetween('longitude', [$lng - $lngDelta, $lng + $lngDelta])
+        ->having('distance_km', '<=', $radius)
+        ->get();
+
+    $hotels = Hotel::query()
+        ->select(['id', 'latitude', 'longitude'])
+        ->selectRaw("$haversine AS distance_km", $bindings)
+        ->addSelect(DB::raw("'hotel' AS category"))
+        ->with('images')
+        ->whereBetween('latitude',  [$lat - $latDelta, $lat + $latDelta])
+        ->whereBetween('longitude', [$lng - $lngDelta, $lng + $lngDelta])
+        ->having('distance_km', '<=', $radius)
+        ->get();
+
+    $environments = Environment::query()
+        ->select(['id',  'latitude', 'longitude'])
+        ->selectRaw("$haversine AS distance_km", $bindings)
+        ->addSelect(DB::raw("'environment' AS category"))
+        ->with('images')
+        ->whereBetween('latitude',  [$lat - $latDelta, $lat + $latDelta])
+        ->whereBetween('longitude', [$lng - $lngDelta, $lng + $lngDelta])
+        ->having('distance_km', '<=', $radius)
+        ->get();
+
+    $items = $restaurants
+        ->concat($hotels)
+        ->concat($environments)
+        ->sortBy('distance_km')
+        ->values();
+       return $this->jsonResponse(true, "Get data", 200, [
+            'center'    => ['lat' => $lat, 'lng' => $lng],
+        'radius_km' => $radius,
+        'count'     => $items->count(),
+        'items'     => $items, 
+        ]);
+           
+    } catch (\Throwable $th) {
+         return response()->json([
+            'result' => false,
+            'status' => 500,
+            'message' => $e->getMessage()
+        ]);
+    }
+ 
+}
+
+  public function filteration(Request $request)
+{
+
+    try {
+    $validated = $request->validate([
+        'city_id'   => 'nullable|integer|exists:cities,id',
+        'rating'    => 'nullable|numeric|min:1|max:5',
+        'min_price' => 'nullable|numeric|min:0',
+        'max_price' => 'nullable|numeric|min:0',
+        'type'      => 'nullable|in:hotel,restaurant,environment',
+        'property'  => 'nullable|array',
+        'property.*'=> 'integer',
+    ]);
+
+    $results = collect();
+
+    $types = $request->type ? [$request->type] : ['hotel', 'restaurant', 'environment'];
+
+    foreach ($types as $type) {
+        $query = match ($type) {
+            'hotel'       => Hotel::query()->with(['images', 'properties', 'feedbacks','city']),
+            'restaurant'  => Restaurant::query()->with(['images', 'properties', 'feedbacks']),
+            'environment' => Environment::query()->with(['images', 'properties', 'feedbacks']),
+        };
+        if ($request->filled('city_id')) {
+            $query->where('city_id', $request->city_id);
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        if ($request->filled('property')) {
+            $query->whereHas('properties', function ($q) use ($request) {
+                $q->whereIn('properties.id', $request->property);
+            });
+        }
+        $items = $query->get()
+            ->filter(function ($item) use ($request) {
+                if (!request()->filled('rating')) {
+                    return true;
+                }
+
+                return $item->average_rating >= request('rating');
+            })
+            ->map(function ($item) use ($type) {
+                return [
+                    'id'           => $item->id,
+                    'name'         => $item->name ?? null,
+                    'latitude'     => $item->latitude,
+                    'longitude'    => $item->longitude,
+                    'rating'       => $item->average_rating,
+                    'city' => $item->city ? [
+                    'id'   => $item->city->id,
+                    'name' => $item->city->name,
+                     ] : null,
+                    'type'         => $type,
+                    'image_url'    => $item->images->map(function ($img) {
+                        return $img->path;
+                    }) ?? null,
+                    'properties'   => $item->properties->pluck('name'),
+                ];
+            });
+
+        $results = $results->concat($items);
+    }
+     return $this->jsonResponse(true, "Filtered data fetched", 200, [
+        'count'   => $results->count(),
+        'items'   => $results->values(),
+        ]);
+     } catch (\Throwable $th) {
+          return response()->json([
+            'result' => false,
+            'status' => 500,
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+
 }

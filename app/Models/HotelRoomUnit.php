@@ -15,6 +15,7 @@ class HotelRoomUnit extends Model
         'is_available',
     ];
 
+    protected $hidden = ['created_at', 'updated_at'];
     // Relationship to the parent room
     public function room()
     {
@@ -23,5 +24,9 @@ class HotelRoomUnit extends Model
     public function availabilities()
     {
     return $this->hasMany(RoomAvailability::class, 'hotel_room_unit_id');
+    }
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'hotel_room_unit_id');
     }
 }

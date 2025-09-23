@@ -52,25 +52,20 @@ Route::get('/restaurants/{id}'    ,    [HomeController::class, 'getRestaurant'  
 Route::get('/environments/{type}' ,    [HomeController::class, 'getEnvironments']);
 Route::get('/environment/{id}'    ,    [HomeController::class, 'getEnvironment' ]);
 Route::get('/journey'             ,    [HomeController::class, 'getJourney'     ]);
-Route::get('/journey/{id}'        ,    [HomeController::class, 'getJourneyById'  ]);
+Route::get('/journey/{id}'        ,    [HomeController::class, 'getJourneyById' ]);
 Route::get('/hotels'              ,    [HomeController::class, 'getHotels'      ]);
 Route::get('/hotel/{id}'          ,    [HomeController::class, 'getHotelById'   ]);
+Route::get('/locations'           ,    [HomeController::class, 'getLocations'   ]);
+Route::get('/search'              ,    [HomeController::class, 'search']);
+Route::get('/nearby'              ,    [HomeController::class, 'nearby']);
+Route::get('/filteration'         ,    [HomeController::class, 'filteration']);
 
 });
 
-Route::controller(DataResourceController::class)->group(function () {
-    Route::get('cities',  'cities');
-});
-Route::controller(DataResourceController::class)->group(function () {
-    Route::get('properties',  'properties');
-});
-Route::controller(DataResourceController::class)->group(function () {
-    Route::get('foodtypes',  'foodtypes');
-});
-
-Route::controller(DataResourceController::class)->group(function () {
-    Route::get('roomtypes',  'roomtypes');
-});
+Route::controller(DataResourceController::class)->group(function () { Route::get('cities',  'cities');});
+Route::controller(DataResourceController::class)->group(function () {Route::get('properties',  'properties');});
+Route::controller(DataResourceController::class)->group(function () {Route::get('foodtypes',  'foodtypes');});
+Route::controller(DataResourceController::class)->group(function () {Route::get('roomtypes',  'roomtypes');});
 
 
 
@@ -185,8 +180,12 @@ Route::middleware(['auth:account', 'role:hotel'])->group(function () {
     Route::get('/hotel/room'              ,        [HotelController::class, 'getHotelRoom']);
     Route::post('/hotel/create-room'      ,        [HotelController::class, 'createHotelRoom']);
     Route::post('/hotel/room/create-unit' ,        [HotelController::class, 'createUnitRoom']);
+    Route::get('/hotel/unit'             ,         [HotelController::class, 'getHotelUnit']);   
     Route::post('/hotel/unit/make-unavailable' ,   [HotelController::class, 'unitUnavailable']);
     Route::get('/hotel/unit/get-unavailable/{id}' ,[HotelController::class, 'getUnitUnavailable']);
+    Route::post('/hotel/unit/reservation' ,        [HotelController::class, 'createReservation']);   
+    Route::get('/hotel/reservation' ,              [HotelController::class, 'getReservation']);   
+    Route::get('/hotel/today-activity' ,           [HotelController::class, 'todayActivity']);   
 });
 
 

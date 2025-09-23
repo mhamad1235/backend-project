@@ -14,7 +14,7 @@ class RoomType extends Model
 
     protected $fillable = [];
     public $translatedAttributes = ['name'];
-    protected $hidden = ['translations'];
+    protected $hidden = ['translations','created_at', 'updated_at', 'deleted_at'];
 
     public function rooms()
     {

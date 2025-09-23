@@ -22,8 +22,12 @@ class Booking extends Model
         'end_time',
         'notes',
     ];
-
-
+    protected $hidden = ['created_at', 'updated_at'];
+    
+    public function getAmountAttribute($value)
+    {
+    return (int) $value;
+    }
    
      public function user(): BelongsTo
     {

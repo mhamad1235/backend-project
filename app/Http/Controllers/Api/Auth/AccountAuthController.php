@@ -23,11 +23,13 @@ public function login(Request $request)
         return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
-    $token = $account->createToken('account-token')->plainTextToken;
+    $accessToken = $account->createToken('access_token_account', ['*'], now()->addMinutes(15))->plainTextToken;
 
+    $refresh_token = $account->createToken('refresh_token_account', ['*'], now()->addDays(30))->plainTextToken;
     return response()->json([
         'account' => $account,
-        'token' => $token,
+        'access_token' => $accessToken,
+        'refresh_token' => $refresh_token,
     ]);
 }
 

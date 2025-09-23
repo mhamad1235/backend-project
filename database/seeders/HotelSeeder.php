@@ -49,8 +49,8 @@ class HotelSeeder extends Seeder
                 'phone'      => '+96470000000' . $i,
                 'latitude'   => '36.19' . $i,
                 'longitude'  => '44.00' . $i,
-                'city_id'    => 1,
-                'account_id' => $i,
+                'city_id'    => 20,
+                'account_id' => 1,
             ]);
 
             $hotel->translateOrNew('en')->name = "Erbil Palace Hotel $i";
@@ -116,7 +116,7 @@ class HotelSeeder extends Seeder
                         RoomAvailability::create([
                             'hotel_room_unit_id' => $unit->id,
                             'date'               => now()->addDays($day)->toDateString(),
-                            'available'          => true,
+                   
                         ]);
                     }
                 }
