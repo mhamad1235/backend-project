@@ -110,6 +110,7 @@ class HotelController extends Controller
         ->where('hotel_id', $hotel_id)
         ->where('id', $room_id)
         ->firstOrFail();
+        
 
     return view('admin.hotels.unit', compact('room','hotel'));
     }
@@ -163,39 +164,81 @@ class HotelController extends Controller
 
     public function edit(Hotel $hotel)
     {
-        return view('admin.hotels.edit', compact('hotel'));
+           $cities = City::with(['translations' => function ($query) {
+        $query->where('locale', 'en');
+        }])->get();
+     
+        $accounts=Account::where('role_type', 'hotel')->get();
+        return view('admin.hotels.edit', compact('hotel','cities','accounts'));
     }
 
-    public function update(Request $request, Hotel $hotel)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ]);
-        
-        $hotel->update([
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-        ]);
-        
-        // Handle new image uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('cabins', 's3');
-                
-                $hotel->images()->create([
-                    'path' => $path
-                ]);
-            }
-        }
-        
-        return redirect()->route('hotels.index')->with('success', 'Cabin updated successfully');
+  public function update(Request $request, Hotel $hotel)
+{
+    $request->validate([
+        'name' => 'required|array',
+        'name.*' => 'required|string|max:255',
+        'description' => 'nullable|array',
+        'description.*' => 'nullable|string',
+        'phone' => 'required|string|max:20',
+        'latitude' => 'required|numeric',
+        'longitude' => 'required|numeric',
+        'city_id' => 'required|exists:cities,id',
+        'account_id' => 'required|exists:accounts,id',
+        'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+    ]);
+
+    // Update non-translatable fields
+    $hotel->update([
+        'phone' => $request->phone,
+        'latitude' => $request->latitude,
+        'longitude' => $request->longitude,
+        'city_id' => $request->city_id,
+        'account_id' => $request->account_id,
+    ]);
+
+    // Update translations
+    foreach ($request->name as $locale => $name) {
+        $hotel->translateOrNew($locale)->name = $name;
+        $hotel->translateOrNew($locale)->description = $request->description[$locale] ?? null;
     }
+
+    $hotel->save();
+
+    // Handle new image uploads
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $path = $image->store('uploads', 's3');
+            
+            $hotel->images()->create([
+                'path' => $path
+            ]);
+        }
+    }
+
+    return redirect()->route('hotels.index')->with('success', 'Hotel updated successfully');
+}
+
+public function deleteImage(Image $image)
+{
+    try {
+        // Check if the image belongs to a hotel (security check)
+        if ($image->imageable_type !== Hotel::class) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        // Delete from S3
+        if (Storage::disk('s3')->exists($image->path)) {
+            Storage::disk('s3')->delete($image->path);
+        }
+
+        // Delete from database
+        $image->delete();
+
+        return response()->json(['success' => true, 'message' => 'Image deleted successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Error deleting image: ' . $e->getMessage()], 500);
+    }
+}
 
     public function destroy(Hotel $hotel)
     {
@@ -211,11 +254,6 @@ class HotelController extends Controller
         return response()->json(['success' => true, 'message' => 'Cabin deleted successfully']);
     }
     
-    public function deleteImage(Image $image)
-    {
-        Storage::disk('s3')->delete($image->path);
-        $image->delete();
-        
-        return response()->json(['success' => true]);
-    }
+
+
 }

@@ -42,6 +42,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::patch('/bookings/{booking}/update-status', [BookingController::class, 'updateStatus'])
         ->name('bookings.update-status');
     Route::resource('environments', EnvironmentController::class);
+    Route::delete('/admin/images/{image}/delete', [EnvironmentController::class, 'deleteImage'])->name('images.delete');
     Route::delete('/images/{image}/delete', [EnvironmentController::class, 'deleteImage'])
         ->name('images.delete');
 
@@ -66,6 +67,7 @@ Route::prefix('restaurants/{restaurant}/foods')->group(function () {
     Route::put('/feedbacks/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('admin.feedbacks.update-status');
         Route::delete('/feedbacks/{feedback}', [FeedbackController::class, 'destroy'])->name('admin.feedbacks.destroy');
 });
+ Route::delete('/admin/images/hotel/{image}/delete', [HotelController::class, 'deleteImage'])->name('hotels.deleteImage');
 Route::get('/test-websocket', function() {
     return view('websocket-test');
 });

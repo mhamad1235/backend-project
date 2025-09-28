@@ -140,42 +140,62 @@ class EnvironmentController extends Controller
         return redirect()->route('environments.index')->with('success', 'Cabin created successfully');
     }
 
-    public function edit(Environment $cabin)
-    {
-        return view('admin.environments.edit', compact('cabin'));
+    public function edit(Environment $environment)
+    { $cities = City::with(['translations' => function ($query) {
+        $query->where('locale', 'en');
+        }])->get();
+        return view('admin.environments.edit', compact('environment', 'cities'));
     }
 
-    public function update(Request $request, Environment $cabin)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ]);
-        
-        $cabin->update([
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-        ]);
-        
-        // Handle new image uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('cabins', 's3');
-                
-                $cabin->images()->create([
-                    'path' => $path
-                ]);
-            }
+public function update(Request $request, Environment $environment)
+{
+    $request->validate([
+        'name' => 'required|array',
+        'name.en' => 'required|string|max:255',
+        'name.ku' => 'required|string|max:255',
+        'name.ar' => 'required|string|max:255',
+        'description' => 'required|array',
+        'description.en' => 'required|string',
+        'description.ku' => 'required|string',
+        'description.ar' => 'required|string',
+        'type' => 'required|string',
+        'phone' => 'required|string|max:20',
+        'latitude' => 'required|numeric',
+        'longitude' => 'required|numeric',
+        'city_id' => 'required|exists:cities,id',
+        'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+    ]);
+
+    // Update non-translatable fields
+    $environment->update([
+        'type' => $request->type,
+        'phone' => $request->phone,
+        'latitude' => $request->latitude,
+        'longitude' => $request->longitude,
+        'city_id' => $request->city_id,
+    ]);
+
+    // Update translations
+    foreach (['en', 'ku', 'ar'] as $locale) {
+        $environment->translateOrNew($locale)->name = $request->name[$locale];
+        $environment->translateOrNew($locale)->description = $request->description[$locale];
+    }
+
+    $environment->save();
+
+    // Handle new image uploads
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $path = $image->store('uploads', 's3');
+            
+            $environment->images()->create([
+                'path' => $path
+            ]);
         }
-        
-        return redirect()->route('cabins.index')->with('success', 'Cabin updated successfully');
     }
 
+    return redirect()->route('environments.index')->with('success', 'Cabin updated successfully');
+}
     public function destroy(Environment $cabin)
     {
         // Delete images from S3
@@ -190,13 +210,20 @@ class EnvironmentController extends Controller
         return response()->json(['success' => true, 'message' => 'Cabin deleted successfully']);
     }
     
-    public function deleteImage(Image $image)
-    {
-        Storage::disk('s3')->delete($image->path);
+   public function deleteImage(Image $image)
+{
+    try {
+ 
+        if (Storage::disk('s3')->exists($image->path)) {
+            Storage::disk('s3')->delete($image->path);
+        }
         $image->delete();
-        
-        return response()->json(['success' => true]);
+
+        return response()->json(['success' => true, 'message' => 'Image deleted successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Error deleting image: ' . $e->getMessage()], 500);
     }
+}
     public function slotsIndex(Environment $environment)
 {
     $slots = $environment->unavailableSlots()->latest()->get();

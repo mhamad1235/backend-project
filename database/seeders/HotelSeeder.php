@@ -49,7 +49,7 @@ class HotelSeeder extends Seeder
                 'phone'      => '+96470000000' . $i,
                 'latitude'   => '36.19' . $i,
                 'longitude'  => '44.00' . $i,
-                'city_id'    => 20,
+                'city_id'    => 1,
                 'account_id' => 1,
             ]);
 

@@ -18,6 +18,7 @@ return new class extends Migration
                 $table->string('password');
                 $table->enum('role_type', ['hotel','tourist','restaurant'])->default(null);
                 $table->enum('status', ['active', 'inactive'])->default('active');
+                $table->string('fcm')->nullable();
                 $table->timestamps();
             });
         }

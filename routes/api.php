@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\HotelBookingController; 
+use App\Http\Controllers\Api\NotificationController; 
 
 Route::group(["prefix" => "auth"], function () {
     // Route::get('/{provider}', [SocialAuthController::class, 'redirectToProvider']);
@@ -79,7 +80,7 @@ Route::controller(DataResourceController::class)->group(function () {Route::get(
 
  Route::prefix('account')->group(function () {
     Route::post('/login', [AccountAuthController::class, 'login']);
-
+    Route::post('/refresh-token/account', [AccountAuthController::class, 'refreshToken']);
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile', function (Request $request) {
             return $request->user(); // Will return the authenticated Account
@@ -94,7 +95,7 @@ Route::controller(DataResourceController::class)->group(function () {Route::get(
          Route::post('/bookings/buses/{bus}', [BookingController::class, 'createBooking']);
          Route::get('/bookings', [BookingController::class, 'getUserBookings']);
          Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelBooking']);
-                 
+         Route::get('/user/notifications', [NotificationController::class, 'getUserNotifications']);
          
  
 
@@ -165,16 +166,18 @@ Route::middleware(['auth:account', 'role:restaurant'])->group(function () {
 
 ///////// Journey Routes
 Route::middleware(['auth:account', 'role:tourist'])->group(function () {
-    Route::get('/journeys', [JourneyController::class, 'index']);
-    Route::get('/journeys/{id}', [JourneyController::class, 'listOfJoined']);
-    Route::post('/journeys', [JourneyController::class, 'store']);
-    Route::post('/journeys/{id}', [JourneyController::class, 'update']);
-    Route::delete('/journeys/{id}', [JourneyController::class, 'destroy']);
+    Route::get('/notifications'     ,  [NotificationController::class, 'getAccountNotifications']);
+    Route::get('/journeys',            [JourneyController::class, 'index']);
+    Route::get('/journeys/{id}',       [JourneyController::class, 'listOfJoined']);
+    Route::post('/journeys',           [JourneyController::class, 'store']);
+    Route::post('/journeys/{id}',      [JourneyController::class, 'update']);
+    Route::delete('/journeys/{id}',    [JourneyController::class, 'destroy']);
 });
 
 
 /////////// Hotel Routes
 Route::middleware(['auth:account', 'role:hotel'])->group(function () {
+    Route::get('/notifications'           ,        [NotificationController::class, 'getAccountNotifications']);
     Route::get('/hotel'                   ,        [HotelController::class, 'getHotel']);
     Route::post('/hotel/create-type'      ,        [HotelController::class, 'createTypeRoom']);
     Route::get('/hotel/room'              ,        [HotelController::class, 'getHotelRoom']);

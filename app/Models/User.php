@@ -11,6 +11,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\Meal;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
 class User extends Authenticatable implements MustVerifyEmail
 {
 
@@ -90,15 +92,20 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     
     public function journeys()
-{
-    return $this->belongsToMany(Journey::class)
-                ->withPivot('paid') // allow access to the 'paid' column
-                ->withTimestamps();
-}
-       public function journeyUsers()
-       {
-        return $this->hasMany(JourneyUser::class);
-       }
+    {
+    return $this->belongsToMany(Journey::class)->withPivot('paid')->withTimestamps();
+    }
+    public function journeyUsers()
+    {
+    return $this->hasMany(JourneyUser::class);
+    } 
+
+     public function notifications(): MorphMany
+    {
+    return $this->morphMany(Notification::class, 'notifiable');
+    }
+
+    
  
 
 }

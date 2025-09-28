@@ -60,7 +60,7 @@
                 <h4 class="card-title">Edit Cabin</h4>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('environments.update', $environment) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('restaurants.update', $restaurant) }}" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     
@@ -87,11 +87,11 @@
                         <div class="tab-pane fade show active" id="en" role="tabpanel">
                             <div class="mb-3">
                                 <label class="form-label">Hotel Name (English) *</label>
-                                <input type="text" class="form-control" name="name[en]" value="{{ $environment->translate('en')->name}}" required>
+                                <input type="text" class="form-control" name="name[en]" value="{{ $restaurant->translate('en')->name}}" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Description (English) *</label>
-                                <textarea class="form-control" name="description[en]" rows="4" required>{{ $environment->translate('en')->description}}</textarea>
+                                <textarea class="form-control" name="description[en]" rows="4" required>{{ $restaurant->translate('en')->description}}</textarea>
                             </div>
                         </div>
                         
@@ -99,11 +99,11 @@
                         <div class="tab-pane fade" id="ku" role="tabpanel">
                             <div class="mb-3">
                                 <label class="form-label">Hotel Name (Kurdish) *</label>
-                                <input type="text" class="form-control" name="name[ku]" value="{{ $environment->translate('ku')->name}}" required>
+                                <input type="text" class="form-control" name="name[ku]" value="{{ $restaurant->translate('ku')->name}}" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Description (Kurdish) *</label>
-                                <textarea class="form-control" name="description[ku]" rows="4" required>{{ $environment->translate('ku')->description}}</textarea>
+                                <textarea class="form-control" name="description[ku]" rows="4" required>{{ $restaurant->translate('ku')->description}}</textarea>
                             </div>
                         </div>
                         
@@ -111,100 +111,16 @@
                         <div class="tab-pane fade" id="ar" role="tabpanel">
                             <div class="mb-3">
                                 <label class="form-label">Hotel Name (Arabic) *</label>
-                                <input type="text" class="form-control" name="name[ar]" value="{{ $environment->translate('ar')->name}}" required>
+                                <input type="text" class="form-control" name="name[ar]" value="{{ $restaurant->translate('ar')->name}}" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Description (Arabic) *</label>
-                                <textarea class="form-control" name="description[ar]" rows="4" required>{{ $environment->translate('ar')->description}}</textarea>
+                                <textarea class="form-control" name="description[ar]" rows="4" required>{{ $restaurant->translate('ar')->description}}</textarea>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="type" class="form-label">Type *</label>
-                            <select name="type" class="form-select" required>
-                                <option value="">Select type</option>
-                          
-                                @foreach(\App\Enums\RestaurantType::cases() as $type)
-                                    <option value="{{ $type->value }}" {{ $environment->type->value == $type->value ? 'selected' : '' }}>
-                                        {{ $type->label() }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="phone" class="form-label">Phone *</label>
-                            <input type="text" class="form-control" id="phone" name="phone" value="{{ $environment->phone }}" required>
-                        </div>
-                        
-                        <div class="col-12 mb-3">
-                            <div class="map-container">
-                                <div class="search-container">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="addressSearch" placeholder="Search location...">
-                                        <button class="btn btn-primary" type="button" id="searchButton">
-                                            <i class="ri-search-line"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="map"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-4 mb-3">
-                            <label for="latitude" class="form-label">Latitude *</label>
-                            <input type="text" class="form-control" id="latitude" name="latitude" value="{{ $environment->latitude }}" readonly required>
-                        </div>
-                        
-                        <div class="col-md-4 mb-3">
-                            <label for="longitude" class="form-label">Longitude *</label>
-                            <input type="text" class="form-control" id="longitude" name="longitude" value="{{ $environment->longitude }}" readonly required>
-                        </div>
-                        
-                        <div class="col-md-4 mb-3">
-                            <label for="accuracy" class="form-label">Accuracy</label>
-                            <input type="text" class="form-control" id="accuracy" readonly>
-                        </div>
-                        
-                        <div class="col-12 mb-3">
-                            <label for="city_id" class="form-label">Select City</label>
-                            <select name="city_id" id="city_id" class="form-select" required>
-                                <option value="">-- Choose City --</option>
-                                @foreach ($cities as $city)
-                                    <option value="{{ $city['id'] }}" {{ $environment->city_id == $city['id'] ? 'selected' : '' }}>
-                                        {{ $city['name'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        <div class="col-12 mb-3">
-                            <label class="form-label">Existing Images</label>
-                            <div class="image-preview-container">
-                                @foreach($environment->images as $image)
-                                <div class="image-preview">
-                                    <img src="{{ Storage::disk('s3')->url($image->path) }}" alt="Cabin image">
-                                    <div class="delete-btn" onclick="deleteImage({{ $image->id }})">
-                                        <i class="ri-close-line"></i>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                        
-                        <div class="col-12 mb-3">
-                            <label for="images" class="form-label">Add More Images</label>
-                            <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/*">
-                            
-                            <div class="image-preview-container" id="imagePreview"></div>
-                        </div>
-                        
-                        <div class="col-12 text-end">
-                            <button type="submit" class="btn btn-primary">Update Cabin</button>
-                        </div>
-                    </div>
+               
                 </form>
             </div>
         </div>
@@ -237,8 +153,8 @@ function deleteImage(imageId) {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize map with cabin location
-    const initialLat = {{ $environment->latitude }};
-    const initialLng = {{ $environment->longitude }};
+    const initialLat = {{ $restaurant->latitude }};
+    const initialLng = {{ $restaurant->longitude }};
     
     const map = L.map('map').setView([initialLat, initialLng], 15);
     

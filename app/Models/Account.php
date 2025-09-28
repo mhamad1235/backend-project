@@ -7,6 +7,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\RoleType;
 use App\Enums\AccountStatus;
+use App\Models\Notification;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 class Account extends Authenticatable
 {
     use HasApiTokens,Notifiable;
@@ -37,6 +39,11 @@ class Account extends Authenticatable
     public function restaurant()
     {
     return $this->hasOne(Restaurant::class);
+    }
+
+    public function notifications(): MorphMany
+    {
+    return $this->morphMany(Notification::class, 'notifiable');
     }
 
 }

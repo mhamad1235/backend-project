@@ -276,11 +276,15 @@ public function getRestaurant($id)
 
     return $this->jsonResponse(true, "Get Hotels", 200, $hotels);
 }
-    public function getLocations(){
+    public function getLocations(Request $request){
          try {
-        $hotels =       Hotel::select('id', 'latitude', 'longitude')->get();
+        $hotels      =  Hotel::select('id', 'latitude', 'longitude')->get();
         $restaurants =  Restaurant::select('id', 'latitude', 'longitude')->get();
         $environments = Environment::select('id', 'latitude', 'longitude')->get();
+            if ($request->has('type')) {
+               
+            }
+     
 
         return $this->jsonResponse(true, "Get Locations", 200, [
             'hotels' => $hotels,
@@ -417,88 +421,125 @@ public function getRestaurant($id)
  
 }
 
-  public function filteration(Request $request)
+ public function filteration(Request $request)
 {
-
     try {
-    $validated = $request->validate([
-        'city_id'   => 'nullable|integer|exists:cities,id',
-        'rating'    => 'nullable|numeric|min:1|max:5',
-        'min_price' => 'nullable|numeric|min:0',
-        'max_price' => 'nullable|numeric|min:0',
-        'type'      => 'nullable|in:hotel,restaurant,environment',
-        'property'  => 'nullable|array',
-        'property.*'=> 'integer',
-    ]);
-
-    $results = collect();
-
-    $types = $request->type ? [$request->type] : ['hotel', 'restaurant', 'environment'];
-
-    foreach ($types as $type) {
-        $query = match ($type) {
-            'hotel'       => Hotel::query()->with(['images', 'properties', 'feedbacks','city']),
-            'restaurant'  => Restaurant::query()->with(['images', 'properties', 'feedbacks']),
-            'environment' => Environment::query()->with(['images', 'properties', 'feedbacks']),
-        };
-        if ($request->filled('city_id')) {
-            $query->where('city_id', $request->city_id);
-        }
-
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
-
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        if ($request->filled('property')) {
-            $query->whereHas('properties', function ($q) use ($request) {
-                $q->whereIn('properties.id', $request->property);
-            });
-        }
-        $items = $query->get()
-            ->filter(function ($item) use ($request) {
-                if (!request()->filled('rating')) {
-                    return true;
-                }
-
-                return $item->average_rating >= request('rating');
-            })
-            ->map(function ($item) use ($type) {
-                return [
-                    'id'           => $item->id,
-                    'name'         => $item->name ?? null,
-                    'latitude'     => $item->latitude,
-                    'longitude'    => $item->longitude,
-                    'rating'       => $item->average_rating,
-                    'city' => $item->city ? [
-                    'id'   => $item->city->id,
-                    'name' => $item->city->name,
-                     ] : null,
-                    'type'         => $type,
-                    'image_url'    => $item->images->map(function ($img) {
-                        return $img->path;
-                    }) ?? null,
-                    'properties'   => $item->properties->pluck('name'),
-                ];
-            });
-
-        $results = $results->concat($items);
-    }
-     return $this->jsonResponse(true, "Filtered data fetched", 200, [
-        'count'   => $results->count(),
-        'items'   => $results->values(),
+        $validated = $request->validate([
+            'city_id'    => 'nullable|integer|exists:cities,id',
+            'rating'     => 'nullable|numeric|min:1|max:5',
+            'min_price'  => 'nullable|numeric|min:0',
+            'max_price'  => 'nullable|numeric|min:0',
+            'type'       => 'nullable|in:hotel,restaurant,environment',
+            'property'   => 'nullable|array',
+            'property.*' => 'integer',
+            'nearby'     => 'nullable|boolean',
+            'lat'        => 'required_if:nearby,true|numeric|between:-90,90',
+            'lng'        => 'required_if:nearby,true|numeric|between:-180,180',
+            'radius_km'  => 'nullable|numeric|min:0',
         ]);
-     } catch (\Throwable $th) {
-          return response()->json([
-            'result' => false,
-            'status' => 500,
-            'message' => $e->getMessage()
+
+        $results = collect();
+        $types = $request->type ? [$request->type] : ['hotel', 'restaurant', 'environment'];
+
+        // Location filtering setup
+        $useNearby = $request->boolean('nearby');
+        $lat = $useNearby ? (float) $request->lat : null;
+        $lng = $useNearby ? (float) $request->lng : null;
+        $radius = $useNearby ? (float) ($request->radius_km ?? 10.0) : null;
+
+        if ($useNearby) {
+            $latDelta = $radius / 111.32;
+            $cosLat = max(cos(deg2rad($lat)), 1e-6);
+            $lngDelta = $radius / (111.32 * $cosLat);
+
+            $haversine = "(6371 * acos(
+                cos(radians($lat)) * cos(radians(latitude)) *
+                cos(radians(longitude) - radians($lng)) +
+                sin(radians($lat)) * sin(radians(latitude))
+            ))";
+        }
+
+        foreach ($types as $type) {
+            $query = match ($type) {
+                'hotel'       => Hotel::query()->with(['images', 'properties', 'feedbacks', 'city']),
+                'restaurant'  => Restaurant::query()->with(['images', 'properties', 'feedbacks']),
+                'environment' => Environment::query()->with(['images', 'properties', 'feedbacks']),
+            };
+
+            // Location filter
+            if ($useNearby) {
+                $query->select('*')
+                    ->selectRaw("$haversine AS distance_km")
+                    ->whereBetween('latitude',  [$lat - $latDelta, $lat + $latDelta])
+                    ->whereBetween('longitude', [$lng - $lngDelta, $lng + $lngDelta])
+                    ->having('distance_km', '<=', $radius);
+            }
+
+            // Other filters
+            if ($request->filled('city_id')) {
+                $query->where('city_id', $request->city_id);
+            }
+
+            if ($request->filled('min_price')) {
+                $query->where('price', '>=', $request->min_price);
+            }
+
+            if ($request->filled('max_price')) {
+                $query->where('price', '<=', $request->max_price);
+            }
+
+            if ($request->filled('property')) {
+                $query->whereHas('properties', function ($q) use ($request) {
+                    $q->whereIn('properties.id', $request->property);
+                });
+            }
+
+            $items = $query->get()
+                ->filter(function ($item) use ($request) {
+               return (float) $item->average_rating <= (float) request('rating');
+                })
+                ->map(function ($item) use ($type, $useNearby) {
+                    return [
+                        'id'         => $item->id,
+                        'name'       => $item->name ?? null,
+                        'latitude'   => $item->latitude,
+                        'longitude'  => $item->longitude,
+                        'rating'     => $item->average_rating,
+                        'city'       => $item->city ? [
+                            'id'   => $item->city->id,
+                            'name' => $item->city->name,
+                        ] : null,
+                        'type'       => $type,
+                        'image_url'  => $item->images->map(fn($img) => $img->path) ?? null,
+                        'properties' => $item->properties->pluck('name'),
+                        'distance_km'=> $useNearby ? round($item->distance_km, 2) : null,
+                    ];
+                });
+
+            $results = $results->concat($items);
+        }
+
+        // Sort by distance if nearby is enabled
+        if ($useNearby) {
+            $results = $results->sortBy('distance_km')->values();
+        }
+
+        return $this->jsonResponse(true, "Filtered data fetched", 200, [
+            'count'     => $results->count(),
+            'items'     => $results,
+            'nearby'    => $useNearby,
+            'center'    => $useNearby ? ['lat' => $lat, 'lng' => $lng] : null,
+            'radius_km' => $useNearby ? $radius : null,
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'result'  => false,
+            'status'  => 500,
+            'message' => $e->getMessage(),
         ]);
     }
 }
+
 
 
 }
