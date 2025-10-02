@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 
@@ -28,9 +28,7 @@ class DataResourceController extends Controller
      
     public function cities()
     {
-        try {
-            //code...
-        
+        try {        
         return new CityCollection(City::orderBy('created_at')->get());
     } catch (\Throwable $th) {
         return $th->getMessage();

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class HotelBookingController extends Controller
         $availableUnitIds = HotelRoomUnit::where('hotel_room_id', $room_id)
             ->whereDoesntHave('availabilities', function ($query) use ($checkIn, $checkOutMinus1) {
                 $query->whereBetween('date', [$checkIn, $checkOutMinus1])
-                      ->where('available', false); // a row = blocked
+                      ->where('status', 'available'); 
             })
             ->limit($roomsRequested)
             ->pluck('id');
@@ -59,7 +59,7 @@ class HotelBookingController extends Controller
 
         $unavailableDates = RoomAvailability::whereIn('hotel_room_unit_id', $unitIds)
             ->whereBetween('date', [$checkIn, $checkOutMinus1])
-            ->where('available', false)
+            ->where('status', 'available')
             ->pluck('date')
             ->unique()
             ->values();
@@ -134,7 +134,7 @@ class HotelBookingController extends Controller
         $availableUnits = HotelRoomUnit::where('hotel_room_id', $room_id)
             ->whereDoesntHave('availabilities', function ($query) use ($checkIn, $checkOutMinus1) {
                 $query->whereBetween('date', [$checkIn, $checkOutMinus1])
-                      ->where('available', false);
+                      ->where('status', 'available');
             })
             ->limit($roomsRequested)
             ->get();
@@ -155,7 +155,7 @@ class HotelBookingController extends Controller
 
         $unavailableDates = RoomAvailability::whereIn('hotel_room_unit_id', $unitIds)
             ->whereBetween('date', [$checkIn, $checkOutMinus1])
-            ->where('available', false)
+            ->where('status', 'available')
             ->pluck('date')
             ->unique()
             ->values();

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -460,5 +460,46 @@ class HotelController extends Controller
         return $this->jsonResponse(false, $e->getMessage(), 500);
     }
     }  
+    
+  public function getUnitsWithRoom(Request $request)
+{
+    $account = auth('account')->user();
+    $hotelId = $account->hotel->id;
+    $today = Carbon::now()->toDateString();
 
+    $units = HotelRoomUnit::with(['room.type', 'room.properties','reservations'])
+        ->whereHas('room', fn ($q) => $q->where('hotel_id', $hotelId))
+      
+        ->get();
+
+    $data = $units->map(function ($unit) use ($today) {
+     $hasAvailability = $unit->availabilities()
+    ->whereDate('date', $today)
+    ->where('status', 'cleaning')
+    ->exists();
+
+
+        return [
+            'unit_id' => $unit->id,
+            'room_number' => $unit->room_number,
+            'available_today' => !$hasAvailability,
+            'room' => [
+                'name' => $unit->room->name,
+                'guest' => $unit->room->guest,
+                'price' => $unit->room->price,
+                'properties'=>$unit->room->properties,
+                'type' => optional($unit->room->type)->name,
+                'reservation' =>$unit->reservations
+            ]
+        ];
+    });
+
+    return response()->json([
+        'result' => true,
+        'status' => 200,
+        'message' => 'Units with room info fetched ✅',
+        'data' => $data,
+    ]);
+
+    }
 }

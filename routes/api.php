@@ -2,31 +2,32 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\SocialAuthController;
-use App\Http\Controllers\Auth\UserController;
-use App\Http\Controllers\Auth\TwilioController;
-use App\Http\Controllers\Auth\Api\LoginController;
-use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Models\User;
-use App\Http\Controllers\Api\Auth\EmailVerificationController;
+use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use Illuminate\Auth\Events\Verified;
-use App\Http\Controllers\Api\Auth\OtpController;
+use App\Http\Controllers\Api\V1\Auth\OtpController;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Api\DataResourceController;
-use App\Http\Controllers\Api\Auth\AccountAuthController;
+use App\Http\Controllers\Api\V1\DataResourceController;
+use App\Http\Controllers\Api\V1\Auth\AccountAuthController;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Hotel;
 use App\Http\Middleware\EnsureAccountRole;
-use App\Http\Controllers\Api\Auth\FIBPaymentController;
+use App\Http\Controllers\Api\V1\Auth\FIBPaymentController;
 use App\Events\NewNotificationEvent;
-use App\Http\Controllers\Api\BookingController;
-use App\Http\Controllers\Api\JourneyController;
-use App\Http\Controllers\Api\RestaurantController;
-use App\Http\Controllers\Api\HotelController;
-use App\Http\Controllers\Api\FavoriteController;
-use App\Http\Controllers\Api\HomeController;
-use App\Http\Controllers\Api\HotelBookingController; 
-use App\Http\Controllers\Api\NotificationController; 
+use App\Http\Controllers\Api\V1\BookingController;
+use App\Http\Controllers\Api\V1\JourneyController;
+use App\Http\Controllers\Api\V1\RestaurantController;
+use App\Http\Controllers\Api\V1\HotelController;
+use App\Http\Controllers\Api\V1\FavoriteController;
+use App\Http\Controllers\Api\V1\HomeController;
+use App\Http\Controllers\Api\V1\HotelBookingController; 
+use App\Http\Controllers\Api\V1\NotificationController; 
+use App\Http\Controllers\Api\V1\GeminiController; 
+use App\Jobs\GenerateGeminiTravelPlan;
+
+Route::prefix('v1')->group(function () {
+
 
 Route::group(["prefix" => "auth"], function () {
     // Route::get('/{provider}', [SocialAuthController::class, 'redirectToProvider']);
@@ -44,9 +45,6 @@ Route::group(["prefix" => "auth"], function () {
 
 
 });
-
-
-
 Route::group(["prefix" => "guest"], function () {
 Route::get('/restaurants'         ,    [HomeController::class, 'getRestaurants' ]);
 Route::get('/restaurants/{id}'    ,    [HomeController::class, 'getRestaurant'  ]);
@@ -60,9 +58,7 @@ Route::get('/locations'           ,    [HomeController::class, 'getLocations'   
 Route::get('/search'              ,    [HomeController::class, 'search']);
 Route::get('/nearby'              ,    [HomeController::class, 'nearby']);
 Route::get('/filteration'         ,    [HomeController::class, 'filteration']);
-
 });
-
 Route::controller(DataResourceController::class)->group(function () { Route::get('cities',  'cities');});
 Route::controller(DataResourceController::class)->group(function () {Route::get('properties',  'properties');});
 Route::controller(DataResourceController::class)->group(function () {Route::get('foodtypes',  'foodtypes');});
@@ -73,7 +69,6 @@ Route::controller(DataResourceController::class)->group(function () {Route::get(
 
 // Route::post('/email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail'])
 //     ->name('verification.send');
-
 // Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verifyEmail'])
 //     ->name('verification.verify');
 
@@ -96,21 +91,13 @@ Route::controller(DataResourceController::class)->group(function () {Route::get(
          Route::get('/bookings', [BookingController::class, 'getUserBookings']);
          Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelBooking']);
          Route::get('/user/notifications', [NotificationController::class, 'getUserNotifications']);
-         
- 
-
          Route::post('fib/first', [BookingController::class, 'first']);
-        
          Route::post('fib/third/{paymentId}', [BookingController::class, 'third']);
-
          Route::post('join/journey/{id}', [BookingController::class, 'second']);
          Route::post('reject/journey/{paymentId}/{journeyId}', [BookingController::class, 'rejectJourney']);
-        
          Route::post('fib/payment-complete', [BookingController::class, 'callback']);
-
          Route::post('/favorites/{type}/{id}', [FavoriteController::class, 'toggle']);
          Route::get('/favorites', [FavoriteController::class, 'index']);
-
          Route::post('/book/hotel/{hotel_id}/{room_id}', [HotelBookingController::class, 'bookHotel']);
          Route::post('/fib/hotel/{hotel_id}/{room_id}',  [HotelBookingController::class, 'bookHotelPayment']);
     });
@@ -172,6 +159,7 @@ Route::middleware(['auth:account', 'role:tourist'])->group(function () {
     Route::post('/journeys',           [JourneyController::class, 'store']);
     Route::post('/journeys/{id}',      [JourneyController::class, 'update']);
     Route::delete('/journeys/{id}',    [JourneyController::class, 'destroy']);
+    Route::post('/hotels/available',   [JourneyController::class, 'available']);
 });
 
 
@@ -189,6 +177,7 @@ Route::middleware(['auth:account', 'role:hotel'])->group(function () {
     Route::post('/hotel/unit/reservation' ,        [HotelController::class, 'createReservation']);   
     Route::get('/hotel/reservation' ,              [HotelController::class, 'getReservation']);   
     Route::get('/hotel/today-activity' ,           [HotelController::class, 'todayActivity']);   
+    Route::get('/hotel/room-management' ,          [HotelController::class, 'getUnitsWithRoom']);  
 });
 
 
@@ -201,4 +190,16 @@ Route::middleware(['auth:account', 'role:hotel'])->group(function () {
    Route::post('/fib/payoutment', [BookingController::class, 'create']);
    Route::post('/fib/authorize/{payoutId}', [BookingController::class, 'authorizePayout']);
    Route::post('/fib/return/{paymentId}', [BookingController::class, 'processPaymentAndAutoPayout']);
-  
+  });
+Route::get('/geminidata', [GeminiController::class, 'geminiData']);
+
+
+Route::get('/request-travel-plan', function () {
+    $userId = 3; // use real user ID in production
+    GenerateGeminiTravelPlan::dispatch($userId);
+
+    return response()->json([
+        'status' => 'queued',
+        'message' => 'Your travel plan is being generated. Please check back shortly.'
+    ]);
+});

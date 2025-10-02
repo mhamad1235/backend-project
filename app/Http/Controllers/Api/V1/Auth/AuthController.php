@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Auth;
+namespace App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Registered;
@@ -53,6 +53,9 @@ class AuthController extends Controller
     }
     public function login(LoginRequest $request)
     {    
+        try {
+            //code...
+      
         $validated = $request->validated();
 
         $user = User::where('phone', $validated["phone"])->first();
@@ -70,6 +73,8 @@ class AuthController extends Controller
             'refresh_token' => $refreshToken,
             'user' => new UserResource($user->load('city'))
         ]);
+          } catch (\Throwable $th) {
+            return response()->json($th->getMessage());        }
     }
 
 

@@ -50,6 +50,11 @@ class HotelRoom extends Model
     {
         return $this->hasMany(HotelRoomUnit::class);
     }
+    
+    public function properties()
+    {
+        return $this->morphToMany(Property::class, 'propertyable');
+    }
 
 
     protected static function booted()

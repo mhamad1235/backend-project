@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 use App\Models\Restaurant;
 use App\Models\Environment;
 use App\Models\Journey;
