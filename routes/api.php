@@ -203,6 +203,9 @@ Route::get('/request-travel-plan', function () {
         'message' => 'Your travel plan is being generated. Please check back shortly.'
     ]);
 });
-Route::get('githubtest',function(){
-    return response()->josn('test');
+Route::get('/request-travel-plan', function () {
+    return response()->json([
+        'status' => 'mhamad salim is here say hi',
+        'message' => 'Your travel plan is being generated. Please check back shortly.'
+    ]);
 });
