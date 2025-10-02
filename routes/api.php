@@ -203,7 +203,7 @@ Route::get('/request-travel-plan', function () {
         'message' => 'Your travel plan is being generated. Please check back shortly.'
     ]);
 });
-Route::get('/request-travel-plan', function () {
+Route::get('/ci/cd', function () {
     return response()->json([
         'status' => 'mhamad salim is here say hi',
         'message' => 'Your travel plan is being generated. Please check back shortly.'
