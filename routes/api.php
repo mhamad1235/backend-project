@@ -25,7 +25,8 @@ use App\Http\Controllers\Api\V1\HotelBookingController;
 use App\Http\Controllers\Api\V1\NotificationController; 
 use App\Http\Controllers\Api\V1\GeminiController; 
 use App\Jobs\GenerateGeminiTravelPlan;
-
+use App\Jobs\GenerateLocation;
+use Illuminate\Support\Str;
 Route::prefix('v1')->group(function () {
 
 
@@ -191,16 +192,20 @@ Route::middleware(['auth:account', 'role:hotel'])->group(function () {
    Route::post('/fib/authorize/{payoutId}', [BookingController::class, 'authorizePayout']);
    Route::post('/fib/return/{paymentId}', [BookingController::class, 'processPaymentAndAutoPayout']);
   });
-Route::get('/geminidata', [GeminiController::class, 'geminiData']);
+Route::get('/geminidata/{code}', [GeminiController::class, 'geminiData']);
 
+Route::get('/geocode', [GeminiController::class, 'showLatLon']);
 
+// api route that returns JSON
+Route::get('sami-park-osm', [GeminiController::class, 'samiParkFromOSM']);
 Route::get('/request-travel-plan', function () {
-    $userId = 3; // use real user ID in production
-    GenerateGeminiTravelPlan::dispatch($userId);
+    $code = generateUniqueCode(16);
+    GenerateGeminiTravelPlan::dispatch($code);
 
     return response()->json([
         'status' => 'queued',
-        'message' => 'Your travel plan is being generated. Please check back shortly.'
+        'message' => 'Your travel plan is being generated. Please check back shortly.',
+        'code_chat'=>$code
     ]);
 });
 Route::get('/ci/cd', function () {
@@ -209,3 +214,37 @@ Route::get('/ci/cd', function () {
         'message' => 'Your travel plan is being generated. Please check back shortly.'
     ]);
 });
+
+Route::get('/request-location/{code}', function ($code) {
+    $code = $code;
+    GenerateLocation::dispatch($code);
+
+    return response()->json([
+        'status' => 'wait',
+        'message' => 'Your travel plan is being generated. Please check back shortly.',
+        'code_chat'=>$code
+    ]);
+});
+Route::get('/ci/cd', function () {
+    return response()->json([
+        'status' => 'mhamad salim is here say hi',
+        'message' => 'Your travel plan is being generated. Please check back shortly.'
+    ]);
+});
+
+function generateUniqueCode($length = 12)
+{
+    // Characters set: letters, numbers, and symbols
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_=+[]{}<>?';
+
+    // Shuffle and generate
+    $code = '';
+    $maxIndex = strlen($characters) - 1;
+
+    for ($i = 0; $i < $length; $i++) {
+        $index = random_int(0, $maxIndex);
+        $code .= $characters[$index];
+    }
+
+    return $code;
+}
