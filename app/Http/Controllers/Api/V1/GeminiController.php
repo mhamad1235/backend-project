@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\GeminiTable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\JsonResponse;
+
 class GeminiController extends Controller
 {
     
