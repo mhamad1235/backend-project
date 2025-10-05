@@ -197,7 +197,7 @@ Route::get('/geminidata/{code}', [GeminiController::class, 'geminiData']);
 Route::get('/geocode', [GeminiController::class, 'showLatLon']);
 
 // api route that returns JSON
-Route::get('sami-park-osm', [GeminiController::class, 'samiParkFromOSM']);
+Route::get('sami-park-osm/{code}', [GeminiController::class, 'samiParkFromOSM']);
 Route::get('/request-travel-plan', function () {
     $code = generateUniqueCode(16);
     GenerateGeminiTravelPlan::dispatch($code);

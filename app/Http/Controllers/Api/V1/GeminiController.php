@@ -22,24 +22,75 @@ class GeminiController extends Controller
 
     return response()->json($data);
 }
-public function samiParkFromOSM(): JsonResponse
+public function samiParkFromOSM($code): JsonResponse
 {
-    $response = Http::withHeaders([
-        'User-Agent' => 'MyApp/1.0 (mhamadsalliim@gmail.com)',
-        'Host' => 'nominatim.openstreetmap.org',  // explicit Host header
-        'Accept' => 'application/json',
-    ])->get('https://nominatim.openstreetmap.org/search', [
-        'q' => 'Sami Abdulrahman Park, Erbil',
-        'format' => 'json',
-        'limit' => 1,
-        'email' => 'mhamadsalliim@gmail.com',
-    ]);
+     $res = GeminiTable::where('code_chat', $code)->first();
+    $data = $res->data;
 
-    if ($response->failed()) {
-        return response()->json(['error' => 'Failed to get data from Nominatim'], 502);
+$results = [];
+
+foreach ($data['days'] as $day) {
+    $dayResult = [
+        'day' => $day['day'],
+        'rows' => []
+    ];
+
+    foreach ($day['rows'] as $row) {
+        $query = $row['location'];
+
+        try {
+            $response = Http::withHeaders([
+                'User-Agent' => 'MyApp/1.0 (mhamadsalliim@gmail.com)',
+                'Accept'     => 'application/json',
+            ])->timeout(10)->get('https://nominatim.openstreetmap.org/search', [
+                'q'      => $query,
+                'format' => 'json',
+                'limit'  => 1,
+                'email'  => 'mhamadsalliim@gmail.com',
+            ]);
+
+            $lat = null;
+            $lon = null;
+
+            if ($response->ok()) {
+                $json = $response->json();
+
+                if (!empty($json) && isset($json[0]['lat'], $json[0]['lon'])) {
+                    $lat = (float) $json[0]['lat'];
+                    $lon = (float) $json[0]['lon'];
+                }
+            } else {
+                Log::warning("Nominatim error", [
+                    'location' => $query,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+            }
+
+            $dayResult['rows'][] = [
+                ...$row,
+                'latitude' => $lat,
+                'longitude' => $lon
+            ];
+
+        } catch (\Throwable $e) {
+            Log::error("Nominatim failed for $query: " . $e->getMessage());
+
+            $dayResult['rows'][] = [
+                ...$row,
+                'latitude' => null,
+                'longitude' => null
+            ];
+        }
     }
 
-    return response()->json($response->json());
+    $results[] = $dayResult;
+}
+
+return response()->json([
+    'days' => $results
+]);
+
 }
 
 }
