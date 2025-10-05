@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class GeminiTable extends Model
 {  protected $table = 'geminitable'; 
-        protected $fillable = ['data'];
-        protected $casts = [
-        'data' => 'array'];
+        protected $fillable = ['data','code_chat'];
+        protected $casts = ['data' => 'array'];
 }

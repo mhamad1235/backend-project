@@ -16,11 +16,11 @@ class GenerateGeminiTravelPlan implements ShouldQueue
 
     public $timeout = 120; // Give it time to finish
 
-    protected $userId;
+    protected $code;
 
-    public function __construct($userId)
+    public function __construct($code)
     {
-        $this->userId = $userId;
+        $this->code = $code;
     }
 
     public function handle(): void
@@ -49,11 +49,11 @@ class GenerateGeminiTravelPlan implements ShouldQueue
 
         
         GeminiTable::Create([
-            'data'=>$data
+            'data'=>$data,
+             'code_chat' => $this->code
         ]);        
         } catch (\Throwable $th) {
-            //throw $th;
-            Log::error("Failed to generate travel plan for user {$this->userId}: " . $th->getMessage());
+        Log::error('Gemini Job failed: ' . $th->getMessage());       
         }
     }
 }

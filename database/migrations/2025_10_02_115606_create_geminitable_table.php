@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('geminitable', function (Blueprint $table) {
             $table->id();
             $table->json('data');
+            $table->string('code_chat');
             $table->timestamps();
         });
     }
