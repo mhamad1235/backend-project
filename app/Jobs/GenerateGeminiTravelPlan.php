@@ -28,14 +28,22 @@ class GenerateGeminiTravelPlan implements ShouldQueue
     }
 
     public function handle(): void
-    {
+    { 
+        $lang;
         try {
-         
+        
+       $lang='Arabic';
+       if (in_array($this->city, ['Erbil','Sulaymaniyah','Dohuk'])) {
+        $lang = 'Kurdish';
+        }
+
+
+   
         
          $raw = Gemini::text()->model('gemini-2.5-flash')
          ->system(
       'You are a travel planner that outputs STRICT JSON only. ' .
-        'Use Arabic for ALL values. ' .
+        'Use'. $lang .'for ALL values. ' .
         'No Markdown, no code fences, no explanations. ' .
         'IMPORTANT: The "location" value must be the full, proper, and most commonly used name of the famous location in that city (e.g., "Erbil Citadel" or "Sami Abdulrahman Park"), with no descriptive words or prefixes.'
         )

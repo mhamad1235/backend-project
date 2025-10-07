@@ -17,7 +17,7 @@ class GeminiController extends Controller
 {
      function generateUniqueCode($length = 12)
     {
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#';
 
     // Shuffle and generate
     $code = '';
@@ -98,7 +98,6 @@ public function getLocation($code)
     $uniqueLocations = [];
     foreach ($data['days'] as $day) {
         foreach (($day['rows'] ?? []) as $row) {
-            
             $loc = trim($row['location'] ?? '');
             if ($loc !== '' && ! in_array($loc, $uniqueLocations, true)) {
                 $uniqueLocations[] = $loc;
@@ -110,9 +109,7 @@ public function getLocation($code)
     foreach ($uniqueLocations as $location) {
       
         $normalized = $location;
-        if (str_word_count($normalized) <= 2 && stripos($normalized, 'iraq') === false) {
-            $normalized .= ', Iraq'; // add context to improve results
-        }
+     
 
         $cacheKey = 'geo_' . md5($normalized);
         $cached = Cache::get($cacheKey, null);
