@@ -197,54 +197,8 @@ Route::get('/geminidata/{code}', [GeminiController::class, 'geminiData']);
 Route::get('/geocode', [GeminiController::class, 'showLatLon']);
 
 // api route that returns JSON
-Route::get('sami-park-osm/{code}', [GeminiController::class, 'samiParkFromOSM']);
-Route::get('/request-travel-plan', function () {
-    $code = generateUniqueCode(16);
-    GenerateGeminiTravelPlan::dispatch($code);
+Route::get('/get-location/{code}',             [GeminiController::class, 'getLocation']);
+Route::get('/request-travel-plan/{city}/{day}',[GeminiController::class, 'requestPlan']);
+Route::get('/request-location/{code}',         [GeminiController::class, 'requestLocation']);
 
-    return response()->json([
-        'status' => 'queued',
-        'message' => 'Your travel plan is being generated. Please check back shortly.',
-        'code_chat'=>$code
-    ]);
-});
-Route::get('/ci/cd', function () {
-    return response()->json([
-        'status' => 'mhamad salim is here say hi',
-        'message' => 'Your travel plan is being generated. Please check back shortly.'
-    ]);
-});
 
-Route::get('/request-location/{code}', function ($code) {
-    $code = $code;
-    GenerateLocation::dispatch($code);
-
-    return response()->json([
-        'status' => 'wait',
-        'message' => 'Your travel plan is being generated. Please check back shortly.',
-        'code_chat'=>$code
-    ]);
-});
-Route::get('/ci/cd', function () {
-    return response()->json([
-        'status' => 'mhamad salim is here say hi',
-        'message' => 'Your travel plan is being generated. Please check back shortly.'
-    ]);
-});
-
-function generateUniqueCode($length = 12)
-{
-    // Characters set: letters, numbers, and symbols
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_=+[]{}<>?';
-
-    // Shuffle and generate
-    $code = '';
-    $maxIndex = strlen($characters) - 1;
-
-    for ($i = 0; $i < $length; $i++) {
-        $index = random_int(0, $maxIndex);
-        $code .= $characters[$index];
-    }
-
-    return $code;
-}
