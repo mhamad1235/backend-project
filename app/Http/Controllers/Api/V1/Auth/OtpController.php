@@ -123,8 +123,7 @@ public function verifyOtp(Request $request)
 
 public function registerAfterVerification(Request $request)
 {
-    try {
-    $request->validate([
+      $request->validate([
         'name' => 'required|string|max:255',
         'dob' => 'required|date',
         'verify_token' => 'required|string',
@@ -132,6 +131,8 @@ public function registerAfterVerification(Request $request)
         'password'=>'required|string|max:255',
         'city_id' => 'required|exists:cities,id'
     ]);
+    try {
+  
     $phone = Cache::get("verify_token_{$request->verify_token}");
 
     if (!$phone) {

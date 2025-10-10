@@ -18,6 +18,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AccountSeeder::class);
         $this->call(AdminSeeder::class);
         $this->call(PlaceSeeder::class);
-        // $this->call(HotelSeeder::class);
+        $this->call(HotelSeeder::class);
     }
 }
