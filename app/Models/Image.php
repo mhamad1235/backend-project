@@ -14,7 +14,10 @@ class Image extends Model
     {
         return $this->morphTo();
     }
-    
+     public function getPathAttribute()
+    {
+        return Storage::disk('s3')->url($this->attributes['path']);
+    }
 
 
 }
