@@ -92,9 +92,9 @@ Route::controller(DataResourceController::class)->group(function () {Route::get(
          Route::get('/bookings', [BookingController::class, 'getUserBookings']);
          Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelBooking']);
          Route::get('/user/notifications', [NotificationController::class, 'getUserNotifications']);
-         Route::post('fib/first', [BookingController::class, 'first']);
-         Route::post('fib/third/{paymentId}', [BookingController::class, 'third']);
-         Route::post('join/journey/{id}', [BookingController::class, 'second']);
+        //  Route::post('fib/first', [BookingController::class, 'first']);
+        //  Route::post('fib/third/{paymentId}', [BookingController::class, 'third']);
+        //  Route::post('join/journey/{id}', [BookingController::class, 'second']);
          Route::post('reject/journey/{paymentId}/{journeyId}', [BookingController::class, 'rejectJourney']);
          Route::post('fib/payment-complete', [BookingController::class, 'callback']);
          Route::post('/favorites/{type}/{id}', [FavoriteController::class, 'toggle']);
@@ -123,7 +123,7 @@ Route::controller(DataResourceController::class)->group(function () {Route::get(
 
 
 
-Route::post('/test-image', [AccountAuthController::class, 'testImage'])->name('api.test.image');
+// Route::post('/test-image', [AccountAuthController::class, 'testImage'])->name('api.test.image');
 
 // Route::get('/test-event', function () {
 //  broadcast(new NewNotificationEvent('🚨 New message'));
@@ -188,13 +188,13 @@ Route::middleware(['auth:account', 'role:hotel'])->group(function () {
    Route::post('callback/hotel', [HotelBookingController::class, 'callbackHotel'])->name('fib.hotel.callback');
    Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund']);
    Route::post('fib/payout', [BookingController::class, 'payout']);
-   Route::post('/fib/payoutment', [BookingController::class, 'create']);
+//    Route::post('/fib/payoutment', [BookingController::class, 'create']);
    Route::post('/fib/authorize/{payoutId}', [BookingController::class, 'authorizePayout']);
-   Route::post('/fib/return/{paymentId}', [BookingController::class, 'processPaymentAndAutoPayout']);
+//    Route::post('/fib/return/{paymentId}', [BookingController::class, 'processPaymentAndAutoPayout']);
   });
 Route::get('/geminidata/{code}', [GeminiController::class, 'geminiData']);
 
-Route::get('/geocode', [GeminiController::class, 'showLatLon']);
+
 
 // api route that returns JSON
 Route::get('/get-location/{code}',             [GeminiController::class, 'getLocation']);
