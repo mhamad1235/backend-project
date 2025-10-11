@@ -276,6 +276,55 @@ public function getRestaurant($id)
 
     return $this->jsonResponse(true, "Get Hotels", 200, $hotels);
 }
+    public function getHotelById($id)  {
+         $hotel = Hotel::with([
+        'city',
+        'images',
+        'feedbacks',
+        'favorites',
+        'properties',
+        'rooms.type', 
+    ])
+    ->withExists(['favorites as is_favorite' => function ($query) {
+        $query->where('user_id', auth()->id());
+    }])
+    ->where('id',$id)
+    ->first();
+        $data= [
+            'id' => $hotel->id,
+            'name' => $hotel->name,
+            'description' => $hotel->description,
+            'address' => $hotel->address,
+            'latitude' => $hotel->latitude,
+            'longitude' => $hotel->longitude,
+            'city' => $hotel->city,
+            'images' => $hotel->images,
+            'feedbacks' => $hotel->feedbacks,
+            'properties' => $hotel->properties,
+            'rooms' => $hotel->rooms->map(function ($room) {
+                return [
+                    'id' => $room->id,
+                    'name' => $room->name,
+                    'capacity' => $room->capacity,   
+                    'quantity' => $room->quantity,
+                    'price' => $room->price,
+                    'is_active' => $room->is_active==1 ? true : false,
+                    'room_type' => $room->type ? [
+                        'id' => $room->type->id,
+                        'name' => $room->type->name,
+                       
+                        
+                    ] : null,
+                ];
+            }),
+            'average_rating' => $hotel->average_rating,
+            'is_favorite' => $hotel->is_favorite,
+        ];
+    
+
+    return $this->jsonResponse(true, "Get Hotels", 200, $data);
+        
+    }
     public function getLocations(Request $request){
          try {
         $hotels      =  Hotel::select('id', 'latitude', 'longitude')->get();
