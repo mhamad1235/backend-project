@@ -67,8 +67,8 @@ class EnvironmentController extends Controller
                     
                     $html = '<div class="d-flex flex-wrap gap-1">';
                     foreach ($images as $image) {
-                        $html .= '<a href="'.Storage::disk('s3')->url($image->path).'" target="_blank">
-                                  <img src="'.Storage::disk('s3')->url($image->path).'" 
+                        $html .= '<a href="'.url($image->path).'" target="_blank">
+                                  <img src="'.url($image->path).'" 
                                        class="img-thumbnail" style="width:50px;height:50px;object-fit:cover">
                                   </a>';
                     }
