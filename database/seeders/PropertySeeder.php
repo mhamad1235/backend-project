@@ -13,10 +13,10 @@ class PropertySeeder extends Seeder
     public function run(): void
     {
          $properties = [
-            ['name' => 'WiFi', 'image_path' => 'public/assets/images/auth-one-bg.jpg'],
-            ['name' => 'Parking', 'image_path' => 'public/assets/images/auth-one-bg.jpg'],
-            ['name' => 'Swimming Pool', 'image_path' => 'public/assets/images/auth-one-bg.jpg'],
-            ['name' => 'Air Conditioning', 'image_path' => 'public/assets/images/auth-one-bg.jpg'],
+            ['name' => 'WiFi', 'image_path' => '/assets/images/auth-one-bg.jpg'],
+            ['name' => 'Parking', 'image_path' => '/assets/images/auth-one-bg.jpg'],
+            ['name' => 'Swimming Pool', 'image_path' => '/assets/images/auth-one-bg.jpg'],
+            ['name' => 'Air Conditioning', 'image_path' => '/assets/images/auth-one-bg.jpg'],
         ];
 
         foreach ($properties as $property) {

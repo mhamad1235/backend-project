@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('places', function (Blueprint $table) {
            $table->id();
-           $table->string('image')->nullable(); // Image path
            $table->decimal('latitude', 10, 8)->nullable();
            $table->decimal('longitude', 11, 8)->nullable();
+           $table->foreignId('city_id')->constrained()->onDelete('cascade'); 
            $table->timestamps();
         });
     }

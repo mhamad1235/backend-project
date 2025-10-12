@@ -15,9 +15,15 @@ class DatabaseSeeder extends Seeder
     {
         
         $this->call(CitySeeder::class);
+        $this->call(PropertySeeder::class);
         $this->call(AccountSeeder::class);
         $this->call(AdminSeeder::class);
         $this->call(PlaceSeeder::class);
         $this->call(HotelSeeder::class);
+        $this->call(EnvironmentSeeder::class);
+        $this->call(JourneySeeder::class);
+        $this->call(PlaceSeeder::class);
+        $this->call(FoodCategorySeeder::class);
+        $this->call(RestaurantSeeder::class);
     }
 }

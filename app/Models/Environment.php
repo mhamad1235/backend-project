@@ -12,14 +12,15 @@ class Environment extends Model implements TranslatableContract
     use HasFactory, Translatable;
 
     public $translatedAttributes = ['name','description'];
-   protected $hidden = [ 'translations'];
+    protected $hidden = [ 'translations','updated_at','created_at'];
 
 
      protected $fillable = ['phone', 'latitude', 'longitude','city_id','type'];
      protected $casts = [
     'type' => RestaurantType::class,
     ];
-     protected $appends = ['is_favorite'];
+     protected $appends = ['is_favorite','average_rating'];
+
 
      public static $hourlyPrices = [
         4 => 100,   

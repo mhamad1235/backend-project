@@ -25,6 +25,12 @@ class AccountSeeder extends Seeder
             'password' => Hash::make('password12345'),
             'role_type' => 'tourist',
         ]);
+           Account::create([
+            'name' => 'restaurant Sunshine',
+            'phone' => '7754812816',
+            'password' => Hash::make('password12345'),
+            'role_type' => 'restaurant',
+        ]);
 
      
     }

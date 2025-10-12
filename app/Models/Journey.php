@@ -11,11 +11,14 @@ class Journey extends Model implements TranslatableContract
 
     public $translatedAttributes = ['name', 'description'];
     protected $with = ['translations'];
+    protected $hidden = [ 'translations','created_at','updated_at'];
     protected $fillable = [
         'tourist_id',
         'duration',
         'price',
         'destination',
+        'start_time',
+        'end_time'
     ];
      protected $appends = ['is_favorite'];
   

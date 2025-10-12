@@ -5,6 +5,7 @@ use App\Models\Restaurant;
 use App\Models\Environment;
 use App\Models\Journey;
 use App\Models\Hotel;
+use App\Models\Place;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -15,8 +16,42 @@ class HomeController extends Controller
     {
         App::setLocale(app()->getLocale());
     }
- public function getRestaurants()
+
+   public function getHomePage()
 {
+    $journeys = Journey::with(['locations','images'])->paginate(8)->items();
+    $environments = Environment::with(['images','city','properties'])->paginate(8)->items();
+    $places = Place::with(['images'])->paginate(8)->items();
+  $restaurants = Restaurant::with([
+    'images',
+    'foods.images',
+    'foods.category',
+    'properties'
+])->paginate(8)->map(function ($restaurant) {
+    $groupedFoods = $restaurant->foods->groupBy(function ($food) {
+        return $food->category?->name ?? 'Uncategorized';
+    });
+    $restaurant->grouped_foods = $groupedFoods;
+    unset($restaurant->foods);
+    return $restaurant;
+});
+
+
+
+    $data = [
+        'journeys' => $journeys,
+        'environments' => $environments,
+        'places' => $places,
+        'restaurants'=>$restaurants
+    ];
+
+    return $this->jsonResponse(true, "Get data", 200, $data);
+}
+
+    
+     
+    public function getRestaurants()
+    {
     $restaurants = Restaurant::with([
             'city',
             'images',

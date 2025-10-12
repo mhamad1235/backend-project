@@ -47,6 +47,7 @@ Route::group(["prefix" => "auth"], function () {
 
 });
 Route::group(["prefix" => "guest"], function () {
+Route::get('/homepage'            ,    [HomeController::class, 'getHomePage' ]);   
 Route::get('/restaurants'         ,    [HomeController::class, 'getRestaurants' ]);
 Route::get('/restaurants/{id}'    ,    [HomeController::class, 'getRestaurant'  ]);
 Route::get('/environments/{type}' ,    [HomeController::class, 'getEnvironments']);

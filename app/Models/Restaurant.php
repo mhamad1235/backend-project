@@ -20,7 +20,7 @@ class Restaurant extends Model implements TranslatableContract
         'city_id',
         'account_id', // Added to link to the account
     ];
-    protected $appends = ['is_favorite'];
+    protected $appends = ['is_favorite','average_rating'];
     
     public function city()
     {

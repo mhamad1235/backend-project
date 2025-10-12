@@ -16,6 +16,8 @@ return new class extends Migration
              $table->foreignId('tourist_id')->constrained('accounts')->onDelete('cascade');
              $table->string('destination');
              $table->integer('duration');
+             $table->date('start_time');
+             $table->date('end_time');
              $table->integer('price');
              $table->timestamps();
         });

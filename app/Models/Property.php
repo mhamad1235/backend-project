@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\URL;
 
 class Property extends Model
 {
@@ -21,5 +22,9 @@ class Property extends Model
     public function environments()
     {
         return $this->morphedByMany(Environment::class, 'propertyable');
+    }
+       public function getImagePathAttribute($value)
+    {
+        return URL::to($value);  
     }
 }

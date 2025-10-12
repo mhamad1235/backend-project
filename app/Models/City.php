@@ -17,7 +17,7 @@ use Astrotomic\Translatable\Translatable;
         public $translatedAttributes = ['name'];
         protected $hidden = ["translations","created_at", "updated_at"];
         protected $cascadeDeletes = ['translations'];
-
+        protected $visible=['name'];
         protected $casts = [
             'status' => ActiveStatus::class,
             'is_delivery' => 'boolean',
