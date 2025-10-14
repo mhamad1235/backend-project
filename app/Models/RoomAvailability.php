@@ -12,15 +12,14 @@ class RoomAvailability extends Model
     protected $fillable = [
         'hotel_room_unit_id',
         'date',
-        'available',
+        'status',
     ];
         protected $hidden = ["created_at", "updated_at"];
-     protected $casts = [
-        'available' => 'boolean',
-     
-    ];
+  
      public function unit()
     {
         return $this->belongsTo(HotelRoomUnit::class, 'hotel_room_unit_id');
     }
+  
+
 }

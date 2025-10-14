@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class RoomTypeTranslation extends Model
+class HotelRoomTranslation extends Model
 {
      public $timestamps = false;
 

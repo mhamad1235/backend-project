@@ -87,7 +87,7 @@ public function createBooking(Request $request, Bus $bus)
     public function getUserBookings(Request $request)
     {
         $bookings = Auth::user()->bookings()
-            ->with(['hotel.city','room.type','unit'])
+            ->with(['hotel.city','unit'])
             ->latest()
             ->paginate(10);
 

@@ -4,15 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class HotelRoom extends Model
+use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
+use Astrotomic\Translatable\Translatable;
+class HotelRoom extends Model implements TranslatableContract
 {
-    use HasFactory;
+    use HasFactory,Translatable;
 
     protected $fillable = [
         'hotel_id',
-        'room_type_id',
-        'name',
         'guest',
         'bedroom',
         'beds',
@@ -20,7 +19,8 @@ class HotelRoom extends Model
         'quantity',
         'price',
     ];
-    protected $hidden = ['created_at', 'updated_at'];
+    protected $hidden = ['created_at', 'updated_at','translations'];
+    public $translatedAttributes = ['name'];
 
     public function getPriceAttribute($value)
     {
@@ -30,11 +30,6 @@ class HotelRoom extends Model
     public function hotel()
     {
         return $this->belongsTo(Hotel::class);
-    }
-
-    public function type()
-    {
-        return $this->belongsTo(RoomType::class, 'room_type_id');
     }
 
     public function images()
@@ -57,15 +52,15 @@ class HotelRoom extends Model
     }
 
 
-    protected static function booted()
-    {
-        static::created(function ($room) {
-            for ($i = 1; $i <= $room->quantity; $i++) {
-                $room->units()->create([
-                    'room_number' => $i,
-                    'room_type' => $room->type ? $room->type->name : null,
-                ]);
-            }
-        });
-    }
+    // protected static function booted()
+    // {
+    //     static::created(function ($room) {
+    //         for ($i = 1; $i <= $room->quantity; $i++) {
+    //             $room->units()->create([
+    //                 'room_number' => $i,
+    //                 'room_type' => null,
+    //             ]);
+    //         }
+    //     });
+    // }
 }

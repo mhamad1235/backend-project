@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Hotel;
 use App\Models\HotelRoom;
-use App\Models\RoomType;
 use App\Models\RoomAvailability;
 use App\Models\HotelRoomUnit;
 
@@ -13,37 +12,47 @@ class HotelSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create Room Types with translations
-        $roomTypesData = [
+        // 1. Define static room types and translations (no RoomType model)
+        $roomTypes = [
             [
-                'en' => ['name' => 'Single Room'],
-                'ar' => ['name' => 'غرفة مفردة'],
-                'ku' => ['name' => 'ژووری تاک'],
+                'key' => 'single',
+                'en' => 'Single Room',
+                'ar' => 'غرفة مفردة',
+                'ku' => 'ژووری تاک',
+                'quantity' => 4,
+                'price' => 50.0,
+                'guest' => 1,
+                'bedroom' => 1,
+                'beds' => 1,
+                'bath' => 1,
             ],
             [
-                'en' => ['name' => 'Double Room'],
-                'ar' => ['name' => 'غرفة مزدوجة'],
-                'ku' => ['name' => 'ژووری دوو'],
+                'key' => 'double',
+                'en' => 'Double Room',
+                'ar' => 'غرفة مزدوجة',
+                'ku' => 'ژووری دوو',
+                'quantity' => 6,
+                'price' => 90.0,
+                'guest' => 2,
+                'bedroom' => 1,
+                'beds' => 1,
+                'bath' => 1,
             ],
             [
-                'en' => ['name' => 'Suite'],
-                'ar' => ['name' => 'جناح'],
-                'ku' => ['name' => 'سویت'],
+                'key' => 'suite',
+                'en' => 'Suite',
+                'ar' => 'جناح',
+                'ku' => 'سویت',
+                'quantity' => 2,
+                'price' => 200.0,
+                'guest' => 4,
+                'bedroom' => 2,
+                'beds' => 2,
+                'bath' => 2,
             ],
         ];
 
-        $roomTypes = [];
-        foreach ($roomTypesData as $typeData) {
-            $roomType = new RoomType();
-            $roomType->save();
-            foreach ($typeData as $locale => $data) {
-                $roomType->translateOrNew($locale)->name = $data['name'];
-            }
-            $roomType->save();
-            $roomTypes[] = $roomType;
-        }
-
-        // 2. Create Hotels with translations
+        // 2. Create Hotels
         for ($i = 1; $i < 2; $i++) {
             $hotel = new Hotel([
                 'phone'      => '+96470000000' . $i,
@@ -64,45 +73,27 @@ class HotelSeeder extends Seeder
 
             $hotel->save();
 
-            // 3. Create Hotel Rooms for each room type
+            // 3. Create Rooms (no RoomType model)
             foreach ($roomTypes as $roomType) {
-                $quantity = match ($roomType->translate('en')->name) {
-                    'Single Room' => 4,
-                    'Double Room' => 6,
-                    'Suite'       => 2,
-                    default       => 1,
-                };
-
-                $price = match ($roomType->translate('en')->name) {
-                    'Single Room' => 50.0,
-                    'Double Room' => 90.0,
-                    'Suite'       => 200.0,
-                    default       => 100.0,
-                };
-
-                $hotelRoom = HotelRoom::create([
-                    'hotel_id'     => $hotel->id,
-                    'room_type_id' => $roomType->id,
-                    'name'         => $roomType->translate('en')->name . " - Room $i",
-                    'guest'        => $roomType->translate('en')->name === 'Suite'
-                        ? 4
-                        : ($roomType->translate('en')->name === 'Double Room' ? 2 : 1),
-                    'bedroom'      => $roomType->translate('en')->name === 'Suite'
-                        ? 2
-                        : ($roomType->translate('en')->name === 'Double Room' ? 1 : 1),
-                    'beds'         => $roomType->translate('en')->name === 'Suite'
-                        ? 2
-                        : ($roomType->translate('en')->name === 'Double Room' ? 1 : 1),
-                    'bath'         => $roomType->translate('en')->name === 'Suite'
-                        ? 2
-                        : ($roomType->translate('en')->name === 'Double Room' ? 1 : 1),
-                    'quantity'     => $quantity,
-                    'price'        => $price,
+                $hotelRoom = new HotelRoom([
+                    'hotel_id' => $hotel->id,
+                    'guest'    => $roomType['guest'],
+                    'bedroom'  => $roomType['bedroom'],
+                    'beds'     => $roomType['beds'],
+                    'bath'     => $roomType['bath'],
+                    'quantity' => $roomType['quantity'],
+                    'price'    => $roomType['price'],
                 ]);
 
-                // 4. Generate units for this room
+                $hotelRoom->translateOrNew('en')->name = $roomType['en'] . " - Room $i";
+                $hotelRoom->translateOrNew('ar')->name = $roomType['ar'] . " - غرفة $i";
+                $hotelRoom->translateOrNew('ku')->name = $roomType['ku'] . " - ژوور $i";
+
+                $hotelRoom->save();
+
+                // 4. Create Units
                 $units = [];
-                for ($j = 1; $j <= $quantity; $j++) {
+                for ($j = 1; $j <= $roomType['quantity']; $j++) {
                     $units[] = HotelRoomUnit::create([
                         'hotel_room_id' => $hotelRoom->id,
                         'room_number'   => $j,
@@ -110,13 +101,12 @@ class HotelSeeder extends Seeder
                     ]);
                 }
 
-                // 5. Generate availability for each unit for next 7 days
+                // 5. Create Availability
                 foreach ($units as $unit) {
                     foreach (range(0, 6) as $day) {
                         RoomAvailability::create([
                             'hotel_room_unit_id' => $unit->id,
                             'date'               => now()->addDays($day)->toDateString(),
-                   
                         ]);
                     }
                 }

@@ -467,7 +467,7 @@ class HotelController extends Controller
     $hotelId = $account->hotel->id;
     $today = Carbon::now()->toDateString();
 
-    $units = HotelRoomUnit::with(['room.type', 'room.properties','reservations'])
+    $units = HotelRoomUnit::with(['room.properties','reservations'])
         ->whereHas('room', fn ($q) => $q->where('hotel_id', $hotelId))
       
         ->get();

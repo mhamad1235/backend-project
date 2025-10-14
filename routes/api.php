@@ -64,7 +64,7 @@ Route::get('/filteration'         ,    [HomeController::class, 'filteration']);
 Route::controller(DataResourceController::class)->group(function () { Route::get('cities',  'cities');});
 Route::controller(DataResourceController::class)->group(function () {Route::get('properties',  'properties');});
 Route::controller(DataResourceController::class)->group(function () {Route::get('foodtypes',  'foodtypes');});
-Route::controller(DataResourceController::class)->group(function () {Route::get('roomtypes',  'roomtypes');});
+
 
 
 
@@ -186,7 +186,7 @@ Route::middleware(['auth:account', 'role:hotel'])->group(function () {
 
 
    Route::post('callback', [BookingController::class, 'callback']);
-   Route::post('callback/hotel', [HotelBookingController::class, 'callbackHotel'])->name('fib.hotel.callback');
+   Route::post(' ', [HotelBookingController::class, 'callbackHotel'])->name('fib.hotel.callback');
    Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund']);
    Route::post('fib/payout', [BookingController::class, 'payout']);
 //    Route::post('/fib/payoutment', [BookingController::class, 'create']);
@@ -201,5 +201,5 @@ Route::get('/geminidata/{code}', [GeminiController::class, 'geminiData']);
 Route::get('/get-location/{code}',             [GeminiController::class, 'getLocation']);
 Route::get('/request-travel-plan/{city}/{day}',[GeminiController::class, 'requestPlan']);
 Route::get('/request-location/{code}',         [GeminiController::class, 'requestLocation']);
-
+Route::get('chatgpt',[HomeController::class,'ask']);
 

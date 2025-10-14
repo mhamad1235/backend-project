@@ -10,11 +10,22 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use App\Services\OpenAIService;
 class HomeController extends Controller
 {
      public function __construct()
     {
         App::setLocale(app()->getLocale());
+    }
+     public function ask(OpenAIService $openai)
+    {
+        $messages = [
+            ['role' => 'user', 'content' => 'Hello, who are you?']
+        ];
+
+        $response = $openai->chat($messages);
+
+        return response()->json($response);
     }
 
    public function getHomePage()
@@ -270,7 +281,7 @@ public function getRestaurant($id)
         'feedbacks',
         'favorites',
         'properties',
-        'rooms.type', 
+        
     ])
     ->withExists(['favorites as is_favorite' => function ($query) {
         $query->where('user_id', auth()->id());
@@ -318,7 +329,7 @@ public function getRestaurant($id)
         'feedbacks',
         'favorites',
         'properties',
-        'rooms.type', 
+
     ])
     ->withExists(['favorites as is_favorite' => function ($query) {
         $query->where('user_id', auth()->id());

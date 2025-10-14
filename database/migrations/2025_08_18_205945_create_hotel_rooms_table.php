@@ -13,14 +13,12 @@ return new class extends Migration
     {
         Schema::create('hotel_rooms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('hotel_id')->constrained()->cascadeOnDelete();
-            $table->string('name');       
+            $table->foreignId('hotel_id')->constrained()->cascadeOnDelete();  
             $table->unsignedInteger('guest'); 
             $table->unsignedInteger('bedroom');
             $table->unsignedInteger('beds');
             $table->unsignedInteger('bath');
-            $table->unsignedInteger('quantity')->default(1); 
-            $table->foreignId('room_type_id')->nullable() ->constrained('room_types')->nullOnDelete();
+            $table->unsignedInteger('quantity')->default(1);
             $table->decimal('price', 10, 2)->nullable(); 
             $table->boolean('is_active')->default(true);
             $table->timestamps();

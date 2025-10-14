@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Account;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 class AccountSeeder extends Seeder
 {
@@ -13,12 +14,19 @@ class AccountSeeder extends Seeder
      */
     public function run(): void
     {
+        User::create([
+          'name' => 'mhamad salim',
+            'phone' => '7754812814',
+            'password' => Hash::make('password12345'),
+            'dob'=>"2001-11-19"
+        ]);
         Account::create([
             'name' => 'Hotel Sunshine',
             'phone' => '7754812814',
             'password' => Hash::make('password12345'),
             'role_type' => 'hotel',
         ]);
+
            Account::create([
             'name' => 'Torist Sunshine',
             'phone' => '7754812815',

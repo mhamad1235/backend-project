@@ -48,4 +48,6 @@ class Booking extends Model
     {
         return $this->belongsTo(HotelRoomUnit::class, 'unit_id');
     }
+   
+
 }
