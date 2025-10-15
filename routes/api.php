@@ -186,7 +186,7 @@ Route::middleware(['auth:account', 'role:hotel'])->group(function () {
 
 
    Route::post('callback', [BookingController::class, 'callback']);
-   Route::post('callback/hotel', [HotelBookingController::class, 'callbackHotel'])->name('fib.hotel.callback');
+   Route::post('callback/hotel', [HotelBookingController::class, 'callbackHotel'])->name('hotel.callback');
    Route::post('fib/refund/{paymentId}', [BookingController::class, 'refund']);
    Route::post('fib/payout', [BookingController::class, 'payout']);
 //    Route::post('/fib/payoutment', [BookingController::class, 'create']);

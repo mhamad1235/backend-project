@@ -100,7 +100,7 @@ class HotelBookingController extends Controller
                 'currency' => 'IQD',
             ],
             'description'       => 'Booking Payment',
-            'statusCallbackUrl' => "https://e678e35df59e.ngrok-free.app/api/v1/callback/hotel",
+            'statusCallbackUrl' =>  route('hotel.callback'),
             'expiresIn'         => 'PT2H',
             'refundableFor'     => 'PT48H',
             'category'          => 'ECOMMERCE',
