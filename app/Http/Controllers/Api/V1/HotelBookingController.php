@@ -100,7 +100,7 @@ class HotelBookingController extends Controller
                 'currency' => 'IQD',
             ],
             'description'       => 'Booking Payment',
-            'statusCallbackUrl' => "https://f6d248007d7c.ngrok-free.app/api/v1/callback/hotel",
+            'statusCallbackUrl' => "https://e678e35df59e.ngrok-free.app/api/v1/callback/hotel",
             'expiresIn'         => 'PT2H',
             'refundableFor'     => 'PT48H',
             'category'          => 'ECOMMERCE',
@@ -161,7 +161,6 @@ class HotelBookingController extends Controller
             );
             $availabilityIds = RoomAvailability::where('batch_token', $batchToken)->pluck('id');
 
-            // Verify that ALL nights are blocked for ALL units
             $blocked = RoomAvailability::whereIn('hotel_room_unit_id', $payment->unit_ids)
                 ->whereBetween('date', [$start->toDateString(), $endIncl->toDateString()])
                 ->where('status','unavailable')
@@ -170,7 +169,6 @@ class HotelBookingController extends Controller
             $expected = count($payment->unit_ids) * $nights;
 
             if ($blocked < $expected) {
-                // Conflict: do NOT create bookings here. Handle refund path upstream if needed.
                 DB::rollBack();
                 return response()->json([
                     'error'   => 'Inventory conflict: not all nights could be blocked.',
@@ -178,35 +176,26 @@ class HotelBookingController extends Controller
                 ], 409);
             }
 
-            // Create one booking per unit; split the total amount evenly (optional)
+           
             $perUnitAmount = round($payment->price / max(count($payment->unit_ids), 1), 2);
 
-            $bookings = [];
-            foreach ($payment->unit_ids as $unitId) {
-                $bookings[] = [
-                    'user_id'        => $payment->user_id,
-                    'hotel_id'       => $payment->hotel_id,
-                    'room_id'        => $payment->room_id,
-                    'unit_id'        => $unitId,
-                    'amount'         => $perUnitAmount,
-                    'status'         => 'confirmed',
-                    'payment_status' => strtolower('pending'),
-                    'payment_method' => 'FIB',
-                    'transaction_id' => $response['paymentId'],
-                    'booking_date'   => now(),
-                    'start_time'     => $payment->check_in,
-                    'end_time'       => $payment->check_out,
-                    'notes'          => 'Hotel booking via FIB',
-                    'created_at'     => now(),
-                    'updated_at'     => now(),
-                ];
-            }
-            foreach ($bookings as $bookingData) {
-    $booking = Booking::create($bookingData);
+          
+            $booking = Booking::create([
+            'user_id'        => $payment->user_id,
+            'hotel_id'       => $payment->hotel_id,
+            'room_id'        => $payment->room_id,
+            'amount'         => $payment->price,
+            'payment_status' => 'pending',
+            'payment_method' => 'FIB',
+            'transaction_id' => $response['paymentId'],
+            'booking_date'   => now(),
+            'start_time'     => $payment->check_in,
+            'end_time'       => $payment->check_out,
+            'notes'          => 'Hotel booking via FIB',
+        ]);
+        $booking->units()->attach($payment->unit_ids);
+        DeleteUnpaidBookingJob::dispatch($booking->id, $availabilityIds)->delay(now()->addMinutes(2));
 
-    DeleteUnpaidBookingJob::dispatch($booking->id, $availabilityIds)->delay(now()->addSeconds(60*2));
-
-}
 
             DB::commit();
               
@@ -278,7 +267,7 @@ $availableUnits = HotelRoom::where('guest', '>=', $guestCount)
      
         try {
             $payment = HotelPayment::where('fib_payment_id', $paymentId)->lockForUpdate()->first();
-     $bookings = Booking::whereIn('transaction_id', (array) $paymentId)->lockForUpdate()->get();
+            $bookings = Booking::whereIn('transaction_id', (array) $paymentId)->lockForUpdate()->get();
 
             if (!$payment ) {
                 return response()->json(['error' => 'Payment not found.'], 404);

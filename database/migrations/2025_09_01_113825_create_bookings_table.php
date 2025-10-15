@@ -16,9 +16,7 @@ return new class extends Migration
         $table->foreignId('user_id')->constrained()->onDelete('cascade');
         $table->foreignId('hotel_id')->constrained()->onDelete('cascade');
         $table->foreignId('room_id')->constrained('hotel_rooms')->onDelete('cascade');
-        $table->foreignId('unit_id')->constrained('hotel_room_units')->onDelete('cascade');
         $table->decimal('amount', 10, 2)->default(0);
-        $table->enum('status', ['pending', 'confirmed', 'rejected', 'cancelled', 'completed'])->default('pending');
         $table->enum('payment_status', ['pending', 'paid', 'failed', 'refunded'])->default('pending');
         $table->string('payment_method')->nullable();
         $table->string('transaction_id')->nullable();

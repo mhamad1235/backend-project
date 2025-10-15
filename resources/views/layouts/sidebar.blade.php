@@ -251,12 +251,7 @@
                    bookings List
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="{{ route('bookings.create') }}"
-                   class="nav-link {{ request()->routeIs('bookings.create') ? 'active' : '' }}">
-                   bookings Bus
-                </a>
-            </li>
+            
         </ul>
     </div>
 </li>

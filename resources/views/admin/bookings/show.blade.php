@@ -12,46 +12,70 @@
             <div class="card-header">
                 <h4 class="card-title">Booking #{{ $booking->id }}</h4>
             </div>
+
             <div class="card-body">
                 <div class="row">
+                    {{-- Left Column: User Info --}}
                     <div class="col-md-6">
-                        <h5>User Information</h5>
+                        <h5 class="mb-3">User Information</h5>
                         <p><strong>Name:</strong> {{ $booking->user->name }}</p>
                         <p><strong>Phone:</strong> {{ $booking->user->phone }}</p>
                         <p><strong>City:</strong> {{ $booking->user->city->name ?? 'N/A' }}</p>
                     </div>
-                    
+
+                    {{-- Right Column: Booking Info --}}
                     <div class="col-md-6">
-                        <h5>Booking Details</h5>
-                        <p><strong>Bookable:</strong> 
-                            @if($booking->bookable_type === 'App\Models\Bus')
-                                Bus ({{ $booking->bookable->owner_name }})
-                            @else
-                                {{ class_basename($booking->bookable_type) }}
-                            @endif
+                        <h5 class="mb-3">Booking Summary</h5>
+                        <p><strong>Date:</strong> {{ $booking->booking_date }}</p>
+                        <p><strong>Time:</strong> {{ $booking->start_time }} - {{ $booking->end_time ?? 'N/A' }}</p>
+                        <p><strong>Amount:</strong> {{ number_format($booking->amount) }} IQD</p>
+                       
+                        <p>
+                            <strong>Payment Status:</strong>
+                            <span class="badge bg-{{ $booking->payment_status == 'paid' ? 'success' : ($booking->payment_status == 'pending' ? 'warning' : 'danger') }}">
+                                {{ ucfirst($booking->payment_status) }}
+                            </span>
                         </p>
-                        <p><strong>Date:</strong> {{ $booking->booking_date->format('M d, Y') }}</p>
-                        <p><strong>Time:</strong> {{ $booking->start_time->format('h:i A') }} - 
-                            {{ $booking->end_time ? $booking->end_time->format('h:i A') : 'N/A' }}</p>
-                        <p><strong>Amount:</strong> ${{ number_format($booking->amount, 2) }}</p>
-                        <p><strong>Status:</strong> <span class="badge bg-{{ $booking->status == 'confirmed' ? 'success' : ($booking->status == 'pending' ? 'warning' : 'danger') }}">
-                            {{ ucfirst($booking->status) }}
-                        </span></p>
-                        <p><strong>Payment Status:</strong> <span class="badge bg-{{ $booking->payment_status == 'paid' ? 'success' : ($booking->payment_status == 'pending' ? 'warning' : 'danger') }}">
-                            {{ ucfirst($booking->payment_status) }}
-                        </span></p>
                     </div>
-                    
+
+                    {{-- Full width: Units Booked --}}
                     <div class="col-12 mt-4">
-                        <h5>Notes</h5>
-                        <p>{{ $booking->notes ?? 'No notes available' }}</p>
+                        <h5 class="mb-3">Booked Units</h5>
+                        <div class="row">
+                            @foreach($booking->units as $unit)
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ $unit->name }}</h6>
+                                            <p class="card-text">
+                                                <strong>Room #:</strong> {{ $unit->room_number }}<br>
+                                                <strong>Guests:</strong> {{ $unit->room->guest ?? 'N/A' }}<br>
+                                                <strong>Bedrooms:</strong> {{ $unit->room->bedroom ?? 'N/A' }}<br>
+                                                <strong>Beds:</strong> {{ $unit->room->beds ?? 'N/A' }}<br>
+                                                <strong>Baths:</strong> {{ $unit->room->bath ?? 'N/A' }}<br>
+                                                <strong>Price:</strong> {{ number_format($unit->room->price) }} IQD<br>
+                                                <strong>Room Type:</strong> {{ $unit->room->name ?? 'N/A' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                    
+
+                    {{-- Full width: Notes --}}
                     <div class="col-12 mt-4">
-                        <a href="{{ route('bookings.index') }}" class="btn btn-light">Back to List</a>
-                        <a href="{{ route('bookings.edit', $booking->id) }}" class="btn btn-primary">Edit Booking</a>
+                        <h5 class="mb-2">Notes</h5>
+                        <p>{{ $booking->notes ?? 'No notes available.' }}</p>
                     </div>
-                </div>
+
+                    {{-- Actions --}}
+                    <div class="col-12 mt-4 d-flex justify-content-between">
+                        <a href="{{ route('bookings.index') }}" class="btn btn-light">← Back to List</a>
+                      
+                    </div>
+
+                </div> {{-- .row --}}
             </div>
         </div>
     </div>

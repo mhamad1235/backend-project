@@ -80,10 +80,9 @@
                         <tr>
                             <th>ID</th>
                             <th>User</th>
-                            <th>Bus</th>
-                            <th>Date & Time</th>
+                            <th>Booking Date</th>
+                            <th>Check_in   &  Check_out</th>
                             <th>Amount</th>
-                            <th>Status</th>
                             <th>Payment</th>
                             <th>Actions</th>
                         </tr>
@@ -96,17 +95,13 @@
                                 {{ $booking->user->name }}<br>
                                 <small class="text-muted">{{ $booking->user->phone }}</small>
                             </td>
-                            <td>
-                                @if($booking->bookable_type === 'App\Models\Bus')
-                                    Bus: {{ $booking->bookable->owner_name }}<br>
-                                    <small class="text-muted">{{ $booking->bookable->phone }}</small>
-                                @else
-                                    {{ class_basename($booking->bookable_type) }}
-                                @endif
+                             <td>
+                             
+                                {{ $booking->booking_date }}
                             </td>
                             <td>
                              
-                                {{ $booking->start_time }}- {{ $booking->end_time}}
+                                {{ $booking->start_time }} - {{ $booking->end_time}}
                             </td>
                             <td>
                                 @if($booking->amount)
@@ -115,15 +110,7 @@
                                     <span class="text-danger">Not set</span>
                                 @endif
                             </td>
-                            <td>
-                                <select class="status-select" data-id="{{ $booking->id }}">
-                                    <option value="pending" {{ $booking->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="confirmed" {{ $booking->status == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                                    <option value="rejected" {{ $booking->status == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                                    <option value="cancelled" {{ $booking->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                    <option value="completed" {{ $booking->status == 'completed' ? 'selected' : '' }}>Completed</option>
-                                </select>
-                            </td>
+                          
                             <td>
                                 @php
                                     $badgeClass = '';

@@ -28,7 +28,7 @@ use App\Models\HotelPayment;
 use Illuminate\Support\Facades\DB;
 use App\Models\JourneyRegistrationGroup;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Facades\App;
 class BookingController extends Controller
 {
 
@@ -36,6 +36,7 @@ class BookingController extends Controller
      public function __construct(FIBPaymentIntegrationService $paymentService)
     {
         $this->paymentService = $paymentService;
+        App::setLocale(app()->getLocale());
     }
      public function getBuses(Request $request)
     {
@@ -87,7 +88,7 @@ public function createBooking(Request $request, Bus $bus)
     public function getUserBookings(Request $request)
     {
         $bookings = Auth::user()->bookings()
-            ->with(['hotel.city','unit'])
+            ->with(['hotel.city','hotel.images','room'])
             ->latest()
             ->paginate(10);
 

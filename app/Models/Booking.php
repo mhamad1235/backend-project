@@ -13,7 +13,6 @@ class Booking extends Model
         'room_id',
         'unit_id',
         'amount',
-        'status',
         'payment_status',
         'payment_method',
         'transaction_id',
@@ -44,10 +43,11 @@ class Booking extends Model
         return $this->belongsTo(HotelRoom::class, 'room_id');
     }
 
-    public function unit(): BelongsTo
+    public function units()
     {
-        return $this->belongsTo(HotelRoomUnit::class, 'unit_id');
+        return $this->belongsToMany(HotelRoomUnit::class, 'booking_unit');
     }
+  
    
 
 }

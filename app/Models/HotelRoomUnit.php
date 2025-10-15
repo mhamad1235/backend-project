@@ -29,4 +29,9 @@ class HotelRoomUnit extends Model
     {
         return $this->hasMany(Reservation::class, 'hotel_room_unit_id');
     }
+    public function bookings()
+    {
+    return $this->belongsToMany(Booking::class, 'booking_unit')->withTimestamps(); 
+    }
+
 }
